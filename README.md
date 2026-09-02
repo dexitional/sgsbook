@@ -88,7 +88,7 @@ Our design system focuses on clean typography, accessible contrast, and smooth A
 3. Set up your environment variables in `.env`:
    ```env
    ANTHROPIC_API_KEY=your_key_here
-   DATABASE_URL="mysql://root:DHRCdodowa1@localhost:3306/ehub"
+   DATABASE_URL="mysql://root:xxxxxxx@localhost:3306/db"
    ```
 4. Run the development server:
    ```bash

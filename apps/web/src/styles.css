@@ -1,0 +1,285 @@
+/* Landing page only — "SGS Booking Platform" wordmark (Engagement) and body
+   content (Noto Sans). Scoped via inline font-family on the landing page's
+   own components, not the shared design tokens, so the rest of the app
+   (admin already imports its own tokens separately; the customer
+   dashboard/auth pages here keep the default Inter) stays unaffected.
+   Must precede `@import "tailwindcss"` below — Tailwind v4 expands that
+   directive into a large block of real CSS at this point, and any @import
+   positioned after it is no longer at the top of the stylesheet, which is
+   invalid per the CSS spec and gets silently dropped by the browser (no
+   network request is even made) rather than erroring. */
+@import url("https://fonts.googleapis.com/css2?family=Engagement&family=Noto+Sans:wght@100..900&display=swap");
+@import "tailwindcss";
+/* Tailwind v4's automatic content detection only walks this app's own
+   source tree, never the sibling @sgs/ui workspace package — any utility
+   used only inside that shared package silently never gets generated
+   here unless this app happens to also use the exact same class string
+   somewhere in its own source. Explicit so this doesn't quietly break the
+   next time a shared component (e.g. DataTable) starts relying on a class
+   this app doesn't otherwise use. */
+@source "../../../packages/ui/src";
+@import "@sgs/ui/tokens.css";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+/* "Start a booking" hero CTA — layered gradient border, a spinning glow
+   ring on hover, and a per-letter wave animation. Ported from a
+   styled-components reference (this project doesn't use styled-components)
+   into plain scoped CSS classes, with the reference's hardcoded coral swapped
+   for our own --primary token and the icon/label kept honest to what this
+   button actually does (navigates to /signup — there's no click-to-"sent"
+   state here, since that pattern belongs to a form submit, not a link). */
+.cta-button {
+  --cta-radius: 9999px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  border-radius: var(--cta-radius);
+  font-weight: 600;
+  font-size: 1rem;
+  color: #0b1220;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow:
+    0 0.5px 0.5px 1px rgba(255, 255, 255, 0.4),
+    0 10px 20px rgba(0, 0, 0, 0.25),
+    0 4px 5px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.cta-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(#ffffff, #eef1f5);
+  z-index: -1;
+}
+.cta-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(#ffffff, #eef1f5) padding-box,
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.35)) border-box;
+  z-index: -1;
+}
+.cta-button:hover {
+  transform: scale(1.03);
+  box-shadow:
+    0 0 1px 2px rgba(255, 255, 255, 0.5),
+    0 15px 30px rgba(0, 0, 0, 0.3);
+}
+.cta-button:active {
+  transform: scale(0.99);
+}
+
+.cta-button__outline {
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: -2;
+}
+.cta-button__outline::before {
+  content: "";
+  position: absolute;
+  inset: -100%;
+  background: conic-gradient(from 180deg, transparent 60%, var(--primary) 80%, transparent 100%);
+  animation: cta-spin 2s linear infinite;
+  animation-play-state: paused;
+}
+.cta-button:hover .cta-button__outline {
+  opacity: 1;
+}
+.cta-button:hover .cta-button__outline::before {
+  animation-play-state: running;
+}
+@keyframes cta-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cta-button__icon {
+  display: inline-flex;
+  color: inherit;
+  transition: transform 0.35s ease, color 0.3s ease 0.1s;
+}
+.cta-button:hover .cta-button__icon {
+  transform: translateX(4px) rotate(-45deg) scale(1.1);
+  color: var(--primary);
+}
+
+.cta-button__label {
+  display: inline-flex;
+}
+.cta-button__label span {
+  display: inline-block;
+  white-space: pre;
+  opacity: 0;
+  animation: cta-in 0.6s ease forwards calc(var(--i) * 0.02s);
+}
+.cta-button:hover .cta-button__label span {
+  /* cta-wave only animates transform/color, not opacity — without setting
+     this explicitly, replacing the `animation` shorthand on :hover drops the
+     "forwards" fill from cta-in, and opacity falls back to the base rule's 0
+     above, making the label invisible on hover. */
+  opacity: 1;
+  animation: cta-wave 0.5s ease forwards calc(var(--i) * 0.02s);
+}
+@keyframes cta-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+@keyframes cta-wave {
+  30% {
+    transform: translateY(3px);
+  }
+  50% {
+    transform: translateY(-2px);
+    color: var(--primary);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Hero glass panel — a rotating gradient beam behind an inset "mask" layer,
+   so only a thin, ever-moving colored ring is visible at the edge. Ported
+   from a styled-components reference card border effect; the reference's
+   neon blue→magenta beam is swapped for --primary → the hero's own
+   #7fd4ff accent to stay in the brand palette. The mask can't just
+   `inherit` the panel's own near-transparent bg-white/10 (that reference's
+   card background is a solid navy, opaque enough to fully hide the beam
+   under it) — it needs its own darker, mostly-opaque fill or the beam
+   washes out the whole panel instead of tracing a thin border; a fixed
+   pixel beam width (not a percentage of the panel) keeps the ring reading
+   as a moving highlight rather than a solid glow on this much wider panel. */
+.hero-panel::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 70px;
+  height: 400%;
+  background-image: linear-gradient(180deg, var(--primary), #7fd4ff);
+  transform: translate(-50%, -50%) rotate(0deg);
+  animation: hero-panel-spin 6s linear infinite;
+}
+.hero-panel::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border-radius: calc(1.5rem - 2px);
+  background: rgba(11, 18, 32, 0.7);
+  backdrop-filter: inherit;
+  -webkit-backdrop-filter: inherit;
+}
+@keyframes hero-panel-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Invoice/Receipt trigger buttons — a chunky "candy pill" ported from a
+   styled-components reference (thick border, flat hard-offset shadow,
+   presses flat on click). The reference's hardcoded blues are swapped for
+   tints of --primary so it reads correctly in both themes; scaled way
+   down from the reference's large standalone button (font-size: large,
+   0.8em/2.2em padding, 6px border, 8px shadow) to fit inline next to the
+   other small row actions. Mirrors apps/admin/src/styles.css's copy so
+   both apps' Invoice/Receipt buttons match. */
+.chunky-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  height: 28px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--primary);
+  background-color: color-mix(in oklab, var(--primary) 6%, var(--card));
+  padding: 0 0.75rem;
+  border-radius: 9999px;
+  border: 2px solid color-mix(in oklab, var(--primary) 40%, var(--card));
+  box-shadow: 0 2px 0 var(--primary);
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease,
+    border-color 0.1s ease,
+    background-color 0.15s ease;
+}
+.chunky-btn:hover {
+  background-color: color-mix(in oklab, var(--primary) 12%, var(--card));
+}
+.chunky-btn:active {
+  transform: translateY(2px);
+  border-color: color-mix(in oklab, var(--primary) 60%, var(--card));
+  box-shadow: none;
+}
+
+/* Facility card price badge — a pulsing "sonar" ripple, ported from a
+   styled-components reference button. The reference flanks its label with
+   two near-invisible ripple icons on a 200px button; scaled down to a
+   single small ripple dot in front of the price (reads as a "live
+   availability" pulse) since a badge this compact can't carry two, and the
+   ring sizes/opacity are shrunk to match a 6px dot instead of a full button. */
+.price-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-width: 130px;
+  border-radius: 9999px;
+  background: var(--primary);
+  color: #fde68a;
+  padding: 0.375rem 1.375rem;
+  font-family: "Engagement", cursive;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.price-badge__ping {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: #fff;
+  animation: price-badge-ripple 1.8s linear infinite;
+}
+@keyframes price-badge-ripple {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(255, 255, 255, 0.5),
+      0 0 0 4px rgba(255, 255, 255, 0.35),
+      0 0 0 8px rgba(255, 255, 255, 0.2);
+  }
+  100% {
+    box-shadow:
+      0 0 0 4px rgba(255, 255, 255, 0.35),
+      0 0 0 8px rgba(255, 255, 255, 0.2),
+      0 0 0 12px rgba(255, 255, 255, 0);
+  }
+}

@@ -1,0 +1,175 @@
+// UBS — University Booking System. Trimmed + extended from
+// upload/schema.prisma's UBS section (kept untouched there as reference).
+//
+// NOTE: the draft's dormant `role` enum (FACILITATOR/ADMINISTRATOR/DECORATOR)
+// was dropped here — nothing referenced it as a field type, it only
+// documented intended sso_arole.title values, which prisma/seed.ts encodes
+// directly instead.
+
+enum itemType {
+  FACILITY
+  ADDON
+}
+
+enum requestStatus {
+  PENDED
+  REJECTED
+  APPROVED
+  COMPLETED
+}
+
+enum requestType {
+  INTERNAL
+  EXTERNAL
+}
+
+model UbsItem {
+  id          String    @id @default(uuid(7))
+  title       String    @db.VarChar(255)
+  description String?   @db.VarChar(650)
+  imageUrl    String?   @db.VarChar(650)
+  amount      Float?
+  intamount   Float?
+  extamount   Float?
+  itemType    itemType  @default(FACILITY)
+  lockId      String?
+  lockUntil   DateTime?
+  status      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  request    UbsRequest?  @relation(fields: [lockId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  UbsPackage UbsPackage[]
+  UbsAddon   UbsAddon[]
+
+  @@map("ubs_item")
+}
+
+model UbsPackage {
+  id        String    @id @default(uuid(7))
+  itemId    String
+  requestId String
+  bookStart DateTime?
+  bookEnd   DateTime?
+
+  bookItem UbsItem    @relation(fields: [itemId], references: [id])
+  request  UbsRequest @relation(fields: [requestId], references: [id])
+  UbsAddon UbsAddon[]
+
+  @@unique([itemId, requestId])
+  @@map("ubs_package")
+}
+
+model UbsAddon {
+  id        String @id @default(uuid(7))
+  itemId    String
+  packageId String
+
+  item    UbsItem    @relation(fields: [itemId], references: [id])
+  package UbsPackage @relation(fields: [packageId], references: [id])
+
+  @@map("ubs_addon")
+}
+
+model UbsClient {
+  id           String      @id @default(uuid(7))
+  name         String      @db.VarChar(255)
+  email        String?     @db.VarChar(255)
+  phone        String?     @db.VarChar(20)
+  mobile       String?     @db.VarChar(20)
+  address      String?     @db.VarChar(650)
+  location     String?     @db.VarChar(255)
+  type         requestType @default(INTERNAL)
+  status       Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  // Additions for customer self-service signup (Better-auth, Google-only).
+  // Nullable: admin staff can create walk-in clients that never sign up.
+  organisation String?     @db.VarChar(255)
+  authUserId   String?     @unique
+  imageUrl     String?     @db.VarChar(650)
+
+  authUser   authUser?          @relation(fields: [authUserId], references: [id])
+  contacts   UbsContactPerson[]
+  UbsRequest UbsRequest[]
+
+  @@map("ubs_client")
+}
+
+model UbsContactPerson {
+  id          String   @id @default(uuid(7))
+  clientId    String
+  name        String   @db.VarChar(255)
+  phone       String?  @db.VarChar(20)
+  email       String?  @db.VarChar(255)
+  designation String?  @db.VarChar(150)
+  isPrimary   Boolean  @default(false)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  client UbsClient @relation(fields: [clientId], references: [id])
+
+  @@map("ubs_contact_person")
+}
+
+model UbsRequest {
+  id           String        @id @default(uuid(7))
+  clientId     String?
+  title        String        @db.VarChar(255)
+  description  String?       @db.VarChar(255)
+  status       requestStatus @default(PENDED)
+  chargeAmount Float?
+  bookStart    DateTime?
+  bookEnd      DateTime?
+  bookDuration Int?
+  createdBy    Int?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  client     UbsClient?   @relation(fields: [clientId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  creator    user?        @relation(fields: [createdBy], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  payment    UbsPayment[]
+  packages   UbsPackage[]
+  lockedItem UbsItem[]
+
+  @@map("ubs_request")
+}
+
+model UbsPayment {
+  id          String   @id @default(uuid(7))
+  requestId   String?
+  description String?  @db.VarChar(255)
+  paidName    String?  @db.VarChar(255)
+  paidRef     String?  @db.VarChar(100)
+  paidAmount  Float?
+  paidAt      DateTime @default(now())
+  createdBy   Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  status Boolean @default(true)
+
+  request UbsRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  creator user?       @relation(fields: [createdBy], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@map("ubs_payment")
+}
+
+// Persisted history for the admin AI insights panel. `snapshot` is stored
+// alongside the answer (not recomputed on read) so reopening history shows
+// exactly the chart/numbers the admin actually saw, not today's live figures.
+model UbsAiMessage {
+  id             String   @id @default(uuid(7))
+  adminUserId    Int
+  question       String   @db.Text
+  answer         String   @db.Text
+  suggestedChart String?  @db.VarChar(20)
+  snapshot       Json?
+  createdAt      DateTime @default(now())
+
+  adminUser user @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId, createdAt])
+  @@map("ubs_ai_message")
+}

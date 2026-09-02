@@ -1,0 +1,79 @@
+// Better-auth — customer identity only (apps/web, Google sign-in).
+// Deliberately separate from sso.prisma's `user` model (admin/staff RBAC).
+// Model names are overridden via betterAuth({ user: { modelName: "authUser" }, ... })
+// in apps/web/src/lib/auth.ts, so this file must stay in sync with that config.
+// Regenerate/verify with: npx @better-auth/cli generate (from apps/web).
+
+model authUser {
+  id            String   @id
+  name          String
+  email         String   @unique
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+
+  sessions authSession[]
+  accounts authAccount[]
+  client   UbsClient?
+
+  @@map("ubs_auth_user")
+}
+
+model authSession {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+
+  user authUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ubs_auth_session")
+}
+
+model authAccount {
+  id                    String    @id
+  // OIDC issuer (e.g. "https://accounts.google.com") — better-auth 1.5+
+  // looks accounts up by [issuer, accountId], not accountId alone. Missing
+  // this caused every real Google callback to 500 with
+  // "Unknown argument `issuer`" — only surfaced once a real OAuth flow
+  // actually ran, since local dev with a placeholder client never reached
+  // this query.
+  issuer                String
+  accountId             String
+  providerId            String
+  userId                String
+  // MySQL's Prisma default (VARCHAR(191)) is too short for real OAuth
+  // tokens — idToken in particular is a JWT and routinely exceeds that.
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  idToken               String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  user authUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([issuer, accountId])
+  @@map("ubs_auth_account")
+}
+
+model authVerification {
+  id         String    @id
+  identifier String
+  // Same VARCHAR(191)-is-too-short issue — Better-auth's OAuth state value
+  // (CSRF token + redirect + PKCE verifier, serialized) regularly exceeds it.
+  value      String    @db.Text
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("ubs_auth_verification")
+}

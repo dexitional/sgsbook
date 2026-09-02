@@ -1,0 +1,143 @@
+/*
+ * Shared design tokens — imported by every app's styles.css. Keeps the same
+ * variable contract shadcn/ui components expect (--background, --primary,
+ * etc.) so `npx shadcn add` in either app keeps working; only the values
+ * differ from shadcn's zinc default.
+ *
+ * NOTE: Geist (the plan's original typography choice) has no reliable
+ * Google Fonts CDN entry point for a plain Vite app, so this substitutes
+ * Inter (UI/headings) + JetBrains Mono (tabular data) — same "modern
+ * variable-weight sans + mono for numbers" intent, just CDN-loadable.
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+:root {
+  --background: #f8fafc;
+  --foreground: #020617;
+  --card: #ffffff;
+  --card-foreground: #020617;
+  --popover: #ffffff;
+  --popover-foreground: #020617;
+  --primary: #172554;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #172554;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #fee2e2;
+  --accent-foreground: #7f1d1d;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #1d4ed8;
+  --chart-1: #172554;
+  --chart-2: #dc2626;
+  --chart-3: #0d9488;
+  --chart-4: #d97706;
+  --chart-5: #7c3aed;
+  --radius: 0.5rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #020617;
+  --sidebar-primary: #172554;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #172554;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #1d4ed8;
+}
+
+.dark {
+  /* Blue-tinted near-black rather than neutral gray, to keep dark mode
+     visually tied to the brand hue instead of looking like a generic theme. */
+  --background: #0b1220;
+  --foreground: #f8fafc;
+  --card: #111a2e;
+  --card-foreground: #f8fafc;
+  --popover: #111a2e;
+  --popover-foreground: #f8fafc;
+  /* blue-950 would vanish against a near-black background, so primary
+     inverts to a brighter blue in dark mode. */
+  --primary: #60a5fa;
+  --primary-foreground: #0b1220;
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #450a0a;
+  --accent-foreground: #fecaca;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #3b82f6;
+  --chart-1: #60a5fa;
+  --chart-2: #f87171;
+  --chart-3: #2dd4bf;
+  --chart-4: #fbbf24;
+  --chart-5: #a78bfa;
+  --sidebar: #0d1526;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #60a5fa;
+  --sidebar-primary-foreground: #0b1220;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: #1e293b;
+  --sidebar-ring: #3b82f6;
+}
+
+@theme inline {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+  }
+}

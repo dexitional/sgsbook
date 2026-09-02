@@ -1,0 +1,1249 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+  // binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// Enums 
+
+enum Title {
+  MR
+  MRS
+  MISS
+  DR
+  DR_MRS
+  REV
+  REV_DR
+  REV_PROF
+  REV_MRS
+  PROF
+  PROF_MRS
+  PROF_EMERITUS
+}
+
+enum unitType {
+  ACADEMIC
+  NON_ACADEMIC
+}
+
+enum visibility {
+  PUBLIC
+  LOCAL
+}
+
+enum transactType {
+  CHARGE
+  BILL
+  PAYMENT
+}
+
+enum stageType {
+  SINGLE
+  MULTIPLE
+}
+
+enum jobType {
+  ACADEMIC
+  NON_ACADEMIC
+}
+
+enum staffCategory {
+  JS
+  SS
+  SM
+}
+
+enum promoType {
+  APPOINTMENT
+  PROMOTION
+  UPGRADE
+}
+
+enum positionType {
+  APPOINTMENT
+  RENEWAL
+}
+
+enum scaleLevel {
+  L
+  H
+  AH
+}
+
+enum AccountType {
+  LINKEDIN
+  GOOGLE
+  CREDENTIAL
+  PIN
+}
+
+enum residentialStatus {
+  RESIDENTIAL
+  NON_RESIDENTIAL
+}
+
+enum EvsActionType {
+  STAGED
+  STARTED
+  ENDED
+}
+
+enum MemoType {
+  SMS
+  VOICE
+}
+
+enum claimStatus {
+  PENDING
+  PROCESSING
+  APPROVED
+  DECLINED
+}
+
+enum proposalStatus {
+  UNDER_REVIEW @map("UNDER REVIEW")
+  APPROVED     @map("APPROVED")
+  NOT_APPROVED @map("NOT APPROVED")
+}
+
+enum cardType {
+  SINGLE
+  BATCH
+}
+
+enum projectType {
+  CONSULTANCY
+  PROJECT
+}
+
+enum photoStatus {
+  APPROVED
+  REJECTED
+  EDIT
+}
+
+// AIS - ACADEMIC MANAGEMENT  MODELS
+
+model country {
+  id          String   @id @default(uuid())
+  code        Int?     @db.Int
+  shortName   String?  @db.VarChar(10)
+  longName    String   @db.VarChar(255)
+  nationality String?  @db.VarChar(300)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  staff    staff[]
+  funders  funder[]  @relation("funderCountry")
+  projects project[] @relation("projectCountry")
+}
+
+model region {
+  id        String   @id @default(uuid())
+  tag       String   @db.VarChar(50)
+  title     String   @db.VarChar(255)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  staff staff[]
+}
+
+model title {
+  id        String   @id @default(uuid())
+  tag       String   @db.VarChar(50)
+  label     String   @db.VarChar(50)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  staff    staff[]
+  relative relative[]
+}
+
+model relation {
+  id        String   @id @default(uuid())
+  title     String   @db.VarChar(255)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  relative relative[]
+}
+
+model marital {
+  id        String   @id @default(uuid())
+  title     String   @db.VarChar(255)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  staff staff[]
+}
+
+// 'SINGLE','MARRIED','SEPARATED','WIDOW','DIVORCED','NONE'
+
+model religion {
+  id        String   @id @default(uuid())
+  title     String   @db.VarChar(255)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  staff staff[]
+}
+
+model disability {
+  id        String   @id @default(uuid())
+  title     String   @db.VarChar(255)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model unit {
+  id             String   @id @default(uuid())
+  code           String   @db.VarChar(50)
+  title          String   @db.VarChar(255)
+  type           unitType
+  levelNum       Int
+  level1Id       String?
+  level2Id       String?
+  location       String?
+  headStaffNo    String?
+  subheadStaffNo String?
+  status         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  level1 unit? @relation("level1", fields: [level1Id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  level2 unit? @relation("level2", fields: [level2Id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  levelone unit[]     @relation("level1")
+  leveltwo unit[]     @relation("level2")
+  postinfo postinfo[]
+  fromUnit transfer[] @relation("fromUnit")
+  toUnit   transfer[] @relation("toUnit")
+  staff    staff[]
+}
+
+// EVS - ELECTA VOTING  MODELS
+
+model election {
+  id             Int           @id @default(autoincrement())
+  groupId        Int?
+  type           String        @db.VarChar(300)
+  title          String?       @db.VarChar(450)
+  tag            String?       @db.VarChar(100)
+  logo           String?       @db.VarChar(450)
+  admins         Json?
+  voterCount     Int           @default(0)
+  voterList      Json?
+  voterData      Json?
+  allowMonitor   Boolean       @default(false)
+  allowEcMonitor Boolean       @default(false)
+  allowVip       Boolean       @default(false)
+  allowEcVip     Boolean       @default(false)
+  allowResult    Boolean       @default(false)
+  allowEcResult  Boolean       @default(false)
+  allowMask      Boolean       @default(false)
+  autoStop       Boolean       @default(false)
+  startAt        DateTime?
+  endAt          DateTime?
+  action         EvsActionType @default(STAGED)
+  status         Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  group     group?      @relation(fields: [groupId], references: [id])
+  portfolio portfolio[]
+  elector   elector[]
+  attack    attack[]
+
+  @@map("evs_election")
+}
+
+model elector {
+  id         Int      @id @default(autoincrement())
+  electionId Int
+  tag        String?  @db.VarChar(100)
+  name       String?  @db.VarChar(450)
+  descriptor String?  @db.VarChar(450)
+  gender     String?  @db.VarChar(1)
+  voteTime   DateTime @default(now())
+  voteSum    String?  @db.VarChar(750)
+  voteHash   String?  @db.VarChar(100)
+  voteIp     String?  @db.VarChar(50)
+  voteStatus Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  election election? @relation(fields: [electionId], references: [id])
+
+  @@map("evs_elector")
+}
+
+model portfolio {
+  id         Int     @id @default(autoincrement())
+  electionId Int
+  title      String? @db.Text
+  status     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  election  election?   @relation(fields: [electionId], references: [id])
+  candidate candidate[]
+
+  @@map("evs_portfolio")
+}
+
+model candidate {
+  id          Int     @id @default(autoincrement())
+  portfolioId Int?
+  tag         String? @db.VarChar(100)
+  name        String? @db.VarChar(450)
+  teaser      String? @db.VarChar(100)
+  orderNo     Int     @default(1)
+  photo       String? @db.VarChar(450)
+  votes       Int     @default(0)
+  status      Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  portfolio portfolio? @relation(fields: [portfolioId], references: [id])
+
+  @@map("evs_candidate")
+}
+
+model attack {
+  id         Int      @id @default(autoincrement())
+  electionId Int?
+  tag        String?  @db.VarChar(100)
+  location   String?  @db.VarChar(450)
+  ip         String?  @db.VarChar(50)
+  meta       String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  election election? @relation(fields: [electionId], references: [id])
+
+  @@map("evs_attack")
+}
+
+// SSO - IDENTITY MANAGEMENT  MODELS
+
+model app {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(300)
+  tag         String   @db.VarChar(50)
+  description String   @db.VarChar(300)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  appRole  appRole[]
+  provider provider[]
+
+  @@map("sso_app")
+}
+
+model appRole {
+  id          Int      @id @default(autoincrement())
+  appId       Int
+  title       String   @db.VarChar(300)
+  description String   @db.VarChar(300)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  app      app?       @relation(fields: [appId], references: [id])
+  userRole userRole[]
+
+  @@map("sso_arole")
+}
+
+model group {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(300)
+  description String   @db.VarChar(300)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     user[]
+  election election[]
+
+  @@map("sso_group")
+}
+
+model user {
+  id        Int      @id @default(autoincrement())
+  groupId   Int
+  tag       String   @unique @db.VarChar(50)
+  username  String   @db.VarChar(50)
+  password  String   @db.VarChar(50)
+  unlockPin String?  @db.VarChar(4)
+  locked    Boolean  @default(false)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  group      group?       @relation(fields: [groupId], references: [id])
+  userRole   userRole[]
+  provider   provider[]
+  UbsRequest UbsRequest[]
+  UbsPayment UbsPayment[]
+
+  @@map("sso_user")
+}
+
+model userRole {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  appRoleId Int
+  roleMeta  String   @db.VarChar(255)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    user?    @relation(fields: [userId], references: [id])
+  appRole appRole? @relation(fields: [appRoleId], references: [id])
+
+  @@map("sso_urole")
+}
+
+model provider {
+  providerId    Int         @id @default(autoincrement())
+  userId        Int?
+  apps          app[]
+  accountType   AccountType
+  accountId     String?
+  accountSecret String?
+  status        Boolean     @default(true)
+
+  user user? @relation(fields: [userId], references: [id])
+
+  @@map("sso_provider")
+}
+
+model support {
+  supportNo Int      @id @default(autoincrement())
+  fname     String   @db.VarChar(255)
+  mname     String?  @db.VarChar(350)
+  lname     String   @db.VarChar(255)
+  gender    String   @db.VarChar(20)
+  phone     String   @db.VarChar(20)
+  email     String?  @db.VarChar(255)
+  address   String?  @db.VarChar(350)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sso_support")
+}
+
+// HRS - HUMAN RESOURCE MANAGEMENT  MODELS
+
+model job {
+  id              String        @id @default(uuid())
+  title           String        @db.VarChar(255)
+  type            jobType
+  yearsToNextRank Int?
+  allowNextRank   Boolean       @default(true)
+  staffCategory   staffCategory
+  status          Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  promotion promotion[]
+  staff     staff[]
+
+  @@map("hrs_job")
+}
+
+model promotion {
+  id            String        @id @default(uuid())
+  staffNo       String?
+  jobId         String?
+  scaleId       String?
+  staffCategory staffCategory
+  letterAt      DateTime
+  startAt       DateTime
+  confirmAt     DateTime
+  probation     Int?
+  type          promoType     @default(APPOINTMENT)
+  status        Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  staff      staff?  @relation("staffPromotion", fields: [staffNo], references: [staffNo])
+  job        job?    @relation(fields: [jobId], references: [id])
+  scale      scale?  @relation(fields: [scaleId], references: [id])
+  firstoffer staff[] @relation("firstoffer")
+  promotion  staff[] @relation("promotion")
+
+  @@map("hrs_promotion")
+}
+
+model postinfo {
+  id              String        @id @default(uuid())
+  unitId          String?
+  title           String        @db.VarChar(255)
+  description     String?       @db.Text
+  duties          String?       @db.Text
+  allowances      Json?
+  durationInYears Int?
+  renewalInYears  Int?
+  staffCategory   staffCategory
+  status          Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  unit     unit?      @relation(fields: [unitId], references: [id])
+  position position[]
+
+  @@map("hrs_postinfo")
+}
+
+model position {
+  id            String        @id @default(uuid())
+  staffNo       String?
+  postinfoId    String?
+  scaleId       String?
+  staffCategory staffCategory
+  letterAt      DateTime
+  startAt       DateTime
+  endAt         DateTime
+  duration      Int?
+  type          positionType  @default(APPOINTMENT)
+  status        Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  staff    staff?    @relation("staffPosition", fields: [staffNo], references: [staffNo])
+  postinfo postinfo? @relation(fields: [postinfoId], references: [id])
+  scale    scale?    @relation(fields: [scaleId], references: [id])
+  position staff[]   @relation("position")
+
+  @@map("hrs_position")
+}
+
+model transfer {
+  id         String    @id @default(uuid())
+  staffNo    String?
+  fromUnitId String?
+  toUnitId   String?
+  reason     String?   @db.VarChar(350)
+  letterAt   DateTime
+  startAt    DateTime
+  status     Boolean   @default(true)
+  createdBy  Int?
+  approvedBy Int?
+  approvedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  fromUnit unit? @relation("fromUnit", fields: [fromUnitId], references: [id])
+  toUnit   unit? @relation("toUnit", fields: [toUnitId], references: [id])
+
+  @@map("hrs_transfer")
+}
+
+model scale {
+  id            String        @id @default(uuid())
+  grade         String?       @db.VarChar(350)
+  gradeNum      Int?
+  notch         Int?
+  notchAmount   Float?
+  level         scaleLevel
+  staffCategory staffCategory
+  status        Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  promotion promotion[]
+  position  position[]
+
+  @@map("hrs_scale")
+}
+
+model staff {
+  staffNo         String    @id @unique
+  titleId         String?
+  fname           String    @db.VarChar(255)
+  mname           String?   @db.VarChar(350)
+  lname           String    @db.VarChar(255)
+  gender          String    @db.VarChar(20)
+  dob             DateTime? @db.DateTime(3)
+  maritalId       String?
+  disabilities    String?   @db.VarChar(350)
+  phone           String    @db.VarChar(20)
+  email           String?   @db.VarChar(255)
+  hometown        String?   @db.VarChar(255)
+  birthplace      String?   @db.VarChar(255)
+  district        String?   @db.VarChar(255)
+  ssnitNo         String?   @db.VarChar(255)
+  ghcardNo        String?   @db.VarChar(255)
+  residentAddress String?   @db.VarChar(350)
+  occupation      String?   @db.VarChar(350)
+  qualification   String?   @db.VarChar(650)
+  instituteEmail  String?   @db.VarChar(350)
+  countryId       String?
+  regionId        String?
+  religionId      String?
+  unitId          String?
+  jobId           String?
+  jobMode         String?   @db.VarChar(350)
+  promotionId     String?
+  positionId      String?
+  firstofferId    String?
+  status          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  title      title?     @relation(fields: [titleId], references: [id])
+  marital    marital?   @relation(fields: [maritalId], references: [id])
+  country    country?   @relation(fields: [countryId], references: [id])
+  region     region?    @relation(fields: [regionId], references: [id])
+  religion   religion?  @relation(fields: [religionId], references: [id])
+  unit       unit?      @relation(fields: [unitId], references: [id])
+  job        job?       @relation(fields: [jobId], references: [id])
+  firstoffer promotion? @relation("firstoffer", fields: [firstofferId], references: [id])
+  promotion  promotion? @relation("promotion", fields: [promotionId], references: [id])
+  position   position?  @relation("position", fields: [positionId], references: [id])
+
+  staffPromotion promotion[] @relation("staffPromotion")
+  staffPosition  position[]  @relation("staffPosition")
+
+  @@map("hrs_staff")
+}
+
+model relative {
+  id         String   @id @default(uuid())
+  relationId String?
+  titleId    String?
+  code       String
+  fname      String   @db.VarChar(255)
+  mname      String?  @db.VarChar(350)
+  lname      String   @db.VarChar(255)
+  gender     String   @db.VarChar(20)
+  dob        DateTime @db.DateTime(3)
+  phone      String   @db.VarChar(20)
+  address    String?  @db.VarChar(350)
+  hometown   String?  @db.VarChar(255)
+  isKin      Boolean  @default(true)
+  isAlive    Boolean  @default(true)
+  status     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  title    title?    @relation(fields: [titleId], references: [id])
+  relation relation? @relation(fields: [relationId], references: [id])
+
+  @@map("hrs_relative")
+}
+
+// ENS - ELECTION NOMINATION SYSTEM
+
+model EnsSession {
+  id        Int        @id @default(autoincrement())
+  tag       String?
+  title     String     @db.VarChar(255)
+  startDate DateTime?
+  endDate   DateTime?
+  vetted    Boolean    @default(false)
+  default   Boolean    @default(false)
+  status    Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  EnsApply  EnsApply[]
+
+  @@index(fields: [title])
+  @@map("ens_session")
+}
+
+model EnsStation {
+  id        String   @id @default(uuid())
+  tag       String?
+  title     String   @db.VarChar(255)
+  location  String   @db.VarChar(255)
+  venue     String   @db.VarChar(255)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ens_station")
+}
+
+model EnsGroup {
+  id        String   @id @default(uuid())
+  tag       String?
+  title     String   @db.VarChar(255)
+  location  String?  @db.VarChar(255)
+  venue     String?  @db.VarChar(255)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  EnsApply  EnsApply[]
+  EnsFilter EnsFilter[]
+
+  @@index(fields: [title])
+  @@index(fields: [tag])
+  @@map("ens_group")
+}
+
+model EnsPosition {
+  id        String   @id @default(uuid())
+  groups    Json?
+  title     String   @db.VarChar(255)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  EnsApply EnsApply[]
+
+  @@index(fields: [title])
+  @@map("ens_position")
+}
+
+model EnsApply {
+  id            String   @id @default(uuid())
+  sessionId     Int?
+  positionId    String?
+  groupId       String?
+  aspirantRegno String   @unique @db.VarChar(50)
+  aspirantName  String?  @db.VarChar(450)
+  aspirantPhone String?  @db.VarChar(50)
+  mateRegno     String?  @db.VarChar(50)
+  mateName      String?  @db.VarChar(450)
+  matePhone     String?  @db.VarChar(50)
+  g1Regno       String?  @db.VarChar(50)
+  g1Phone       String?  @db.VarChar(50)
+  g2Regno       String?  @db.VarChar(50)
+  g2Phone       String?  @db.VarChar(50)
+  teaser        String?  @db.VarChar(350)
+  photo         String?  @db.LongText
+  cv            String?  @db.LongText
+  ballotNo      Int?
+  cgpa          String?  @db.VarChar(10)
+  vetScore      Float?   @default(0)
+  vetTotal      Float?   @default(0)
+  senderId      String?  @db.VarChar(50)
+  smsCredit     Int      @default(0)
+  voiceCredit   Int      @default(0)
+  smsCampaign   Int      @default(0)
+  activateSms   Boolean  @default(false)
+  g1Verified    Boolean  @default(false)
+  g2Verified    Boolean  @default(false)
+  formSubmit    Boolean  @default(false)
+  isCandidate   Boolean  @default(false)
+  consent       Boolean  @default(false)
+  status        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  position EnsPosition? @relation(fields: [positionId], references: [id])
+  group    EnsGroup?    @relation(fields: [groupId], references: [id])
+  session  EnsSession?  @relation(fields: [sessionId], references: [id])
+  EnsMemo  EnsMemo[]
+
+  @@index(fields: [aspirantRegno])
+  @@index(fields: [g1Regno])
+  @@index(fields: [g2Regno])
+  @@index(fields: [sessionId])
+  @@index(fields: [groupId])
+  @@index(fields: [positionId])
+  @@index(fields: [sessionId, positionId, groupId])
+  @@map("ens_apply")
+}
+
+model EnsFilter {
+  id        String   @id @default(uuid())
+  groupId   String?
+  tag       String   @db.VarChar(150)
+  title     String?  @db.VarChar(450)
+  query     String?  @db.LongText
+  data      Json?
+  count     Int?
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  group EnsGroup? @relation(fields: [groupId], references: [id])
+
+  @@index(fields: [title])
+  @@index(fields: [groupId])
+  @@map("ens_filter")
+}
+
+model EnsMemo {
+  id            String    @id @default(uuid())
+  applicantId   String?
+  type          MemoType? @default(SMS)
+  title         String?   @db.VarChar(450)
+  message       String?   @db.LongText
+  count         Int?
+  deliveryCount Int?      @default(0)
+  deliveryMeta  Json?
+  status        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  applicant EnsApply? @relation(fields: [applicantId], references: [id])
+
+  @@index(fields: [title])
+  @@index(fields: [applicantId])
+  @@map("ens_memo")
+}
+
+// DRIC - PROJECT PLUS
+model projectCoinvestigator {
+  projectId        String
+  coinvestigatorId String
+  project          project      @relation(fields: [projectId], references: [id])
+  coinvestigator   investigator @relation(fields: [coinvestigatorId], references: [id])
+
+  @@id([projectId, coinvestigatorId])
+  @@map("dric_project_coinvestigator")
+}
+
+model activityPersonnel {
+  activityId String
+  personelId String
+  activity   activity @relation(fields: [activityId], references: [id])
+  personel   personel @relation(fields: [personelId], references: [id])
+
+  @@id([activityId, personelId])
+  @@map("dric_activity_personnel")
+}
+
+model currency {
+  id        String   @id @default(uuid())
+  shortName String   @db.VarChar(5)
+  longName  String   @db.VarChar(255)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tranche      tranche[]
+  project      project[]
+  activity     activity[]
+  requestClaim claim[]    @relation("request")
+
+  @@map("dric_currency")
+}
+
+model funder {
+  id          String   @id @default(uuid())
+  countryId   String?
+  title       String   @db.VarChar(255)
+  description String?  @db.Text
+  location    String?  @db.VarChar(255)
+  address     String?  @db.VarChar(350)
+  logo        String?  @db.VarChar(255)
+  email       String?  @unique @db.VarChar(255)
+  phone       String?  @unique @db.VarChar(20)
+  userName    String?  @db.VarChar(40)
+  password    String?  @db.VarChar(40)
+  accessPage  String?  @db.VarChar(255)
+  publicPage  String?  @db.VarChar(255)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projects project[]
+  country  country?   @relation("funderCountry", fields: [countryId], references: [id])
+  proposal proposal[]
+
+  @@index([title])
+  @@map("dric_funder")
+}
+
+model investigator {
+  id          String   @id @default(uuid())
+  staffNo     Int      @unique
+  title       String   @db.VarChar(25)
+  fname       String   @db.VarChar(255)
+  mname       String?  @db.VarChar(350)
+  lname       String   @db.VarChar(255)
+  email       String   @unique @db.VarChar(255)
+  phone       String   @unique @db.VarChar(20)
+  location    String?  @db.VarChar(255)
+  address     String?  @db.VarChar(350)
+  ghCardNo    String?  @db.VarChar(255)
+  tinNo       String?  @db.VarChar(255)
+  department  String?  @db.VarChar(350)
+  accountName String?  @db.VarChar(650)
+  bankAccount String?  @db.VarChar(255)
+  bankName    String?  @db.VarChar(255)
+  bankBranch  String?  @db.VarChar(255)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  principalInvestigator project[]               @relation("principal")
+  coInvestigator        projectCoinvestigator[]
+  claims                claim[]
+
+  @@index([staffNo, ghCardNo, email, phone])
+  @@map("dric_investigator")
+}
+
+model personel {
+  id          String   @id @default(uuid())
+  identity    String   @unique
+  title       String   @db.VarChar(25)
+  fname       String   @db.VarChar(255)
+  mname       String?  @db.VarChar(350)
+  lname       String   @db.VarChar(255)
+  email       String   @unique @db.VarChar(255)
+  phone       String   @unique @db.VarChar(20)
+  location    String?  @db.VarChar(255)
+  address     String?  @db.VarChar(350)
+  ghCardNo    String?  @db.VarChar(255)
+  tinNo       String?  @db.VarChar(255)
+  department  String?  @db.VarChar(350)
+  accountName String?  @db.VarChar(650)
+  bankAccount String?  @db.VarChar(255)
+  bankName    String?  @db.VarChar(255)
+  bankBranch  String?  @db.VarChar(255)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  activities activityPersonnel[]
+
+  @@index([identity, ghCardNo, email, phone])
+  @@map("dric_personel")
+}
+
+model proposal {
+  id          String         @id @default(uuid())
+  funderId    String?
+  otherFunder String?        @db.VarChar(650)
+  topic       String         @db.Text
+  summary     String?        @db.Text
+  StaffNo     Int            @db.Int
+  status      proposalStatus @default(UNDER_REVIEW)
+  statusAt    DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  funder      funder?        @relation(fields: [funderId], references: [id])
+}
+
+model claim {
+  id                String      @id @default(uuid())
+  phaseId           String?
+  title             String      @db.VarChar(450)
+  requestContent    String?     @db.Text
+  requestAmount     Float?
+  requestCurrencyId String?
+  status            claimStatus @default(PENDING)
+  approvedAt        DateTime?
+  createdBy         Int         @db.Int
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  phase           phase?       @relation(fields: [phaseId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  investigator    investigator @relation(fields: [createdBy], references: [staffNo])
+  requestCurrency currency?    @relation("request", fields: [requestCurrencyId], references: [id])
+  tranche         tranche[]
+
+  @@map("dric_claim")
+}
+
+model tranche {
+  id             String    @id @default(uuid())
+  phaseId        String?
+  claimId        String?
+  title          String    @db.VarChar(450)
+  description    String?   @db.Text
+  conversionRate Float?
+  paidCurrencyId String?
+  paidAmount     Float
+  paidAt         DateTime?
+  createdBy      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime? @updatedAt
+
+  phase        phase?    @relation(fields: [phaseId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  claim        claim?    @relation(fields: [claimId], references: [id])
+  paidCurrency currency? @relation(fields: [paidCurrencyId], references: [id])
+
+  @@map("dric_tranche")
+}
+
+model project {
+  id             String      @id @default(uuid())
+  countryId      String?
+  funderId       String?
+  investigatorId String?
+  title          String      @db.VarChar(255)
+  start          DateTime?
+  end            DateTime?
+  duration       Int?
+  phaseCount     Int?        @default(0)
+  phaseDates     Json?
+  currencyId     String?
+  amount         Float?
+  trenchTotal    Float?
+  type           projectType
+  description    String      @db.Text
+  report         String?     @db.Text
+  contractUrl    String      @db.Text
+  budgetUrl      String      @db.Text
+  completed      Boolean     @default(false)
+  awardedAt      DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  country         country?                @relation("projectCountry", fields: [countryId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  funder          funder?                 @relation(fields: [funderId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  currency        currency?               @relation(fields: [currencyId], references: [id])
+  investigator    investigator?           @relation("principal", fields: [investigatorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  coinvestigators projectCoinvestigator[]
+  phases          phase[]
+
+  @@index([title])
+  @@map("dric_project")
+}
+
+model phase {
+  id                  String    @id @default(uuid())
+  projectId           String?
+  title               String?   @db.VarChar(350)
+  description         String?
+  count               Int?
+  projectAmount       Float? // Project Amount Brought Forward
+  phaseAmount         Float // Phase Amount Issued
+  projectPhaseBalance Float? // Difference Betweem Project Amount & Phase Amount ( projectAmount - phaseDisburseAmount )
+  phaseDisburseAmount Float? // Amount Disbursed for Phase Operations
+  phaseBalance        Float? // Amount Left after Phase Operation Disbursal ( Phase - Disburse )
+  finalReport         String?   @db.Text
+  start               DateTime?
+  end                 DateTime?
+  delivCount          Int?
+  delivComplete       Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  activities activity[]
+  tranches   tranche[]
+  project    project?   @relation(fields: [projectId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  claim      claim[]
+
+  @@index([title])
+  @@map("dric_phase")
+}
+
+model activity {
+  id            String   @id @default(uuid())
+  phaseId       String?
+  title         String
+  description   String?
+  subject       String?
+  duration      Int?
+  place         String?
+  amount        Float? // Amount Issued on Activity
+  currencyId    String?
+  start         DateTime
+  end           DateTime
+  delivComplete Boolean  @default(false)
+  delivComment  String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  phase     phase?              @relation(fields: [phaseId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  currency  currency?           @relation(fields: [currencyId], references: [id])
+  personels activityPersonnel[]
+
+  @@index([title])
+  @@map("dric_activity")
+}
+
+// UCARD SYSTEM
+model card {
+  id              Int       @id @default(autoincrement())
+  tag             String    @db.VarChar(255)
+  description     String?   @db.VarChar(650)
+  deliveryNote    String?   @db.VarChar(650)
+  group           String    @db.VarChar(255)
+  type            cardType? @default(BATCH)
+  quantityLoaded  Int
+  quantityPrinted Int?
+  loadData        Json?
+  printData       Json?
+  noImageData     Json?
+  printed         Boolean   @default(false)
+  printedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("cad_card")
+}
+
+model photo {
+  id              Int       @id @default(autoincrement())
+  tag             String    @unique @db.VarChar(255)
+  tempBase64      String?   @db.Text()
+  deliveryNote    String?   @db.VarChar(650)
+  printed         Boolean   @default(false)
+  status          photoStatus?   
+  printedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("cad_photo")
+}
+
+// UBS - UNIVERSITY BOOKING SYSTEM
+
+enum itemType {
+  FACILITY
+  ADDON
+}
+
+enum requestStatus {
+  PENDED
+  REJECTED
+  APPROVED
+  COMPLETED
+}
+
+enum requestType {
+  INTERNAL
+  EXTERNAL
+}
+
+enum role {
+  FACILITATOR
+  ADMINISTRATOR
+  DECORATOR
+}
+
+model UbsItem {
+  id          String    @id @default(uuid(7))
+  title       String    @db.VarChar(255)
+  description String?   @db.VarChar(650)
+  amount      Float?
+  intamount   Float?
+  extamount   Float?
+  itemType    itemType  @default(FACILITY)
+  lockId      String?
+  lockUntil   DateTime?
+  status      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  request    UbsRequest?  @relation(fields: [lockId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  UbsPackage UbsPackage[]
+  UbsAddon   UbsAddon[]
+
+  @@map("ubs_item")
+}
+
+model UbsPackage {
+  id        String @id @default(uuid(7))
+  itemId    String
+  requestId String
+  bookStart    DateTime?
+  bookEnd      DateTime?
+  bookItem UbsItem    @relation(fields: [itemId], references: [id])
+  request  UbsRequest @relation(fields: [requestId], references: [id])
+  UbsAddon UbsAddon[]
+
+  @@unique([itemId, requestId])
+  @@map("ubs_package")
+}
+
+model UbsAddon {
+  id        String @id @default(uuid(7))
+  itemId    String
+  packageId String
+
+  item    UbsItem    @relation(fields: [itemId], references: [id])
+  package UbsPackage @relation(fields: [packageId], references: [id])
+
+  @@map("ubs_addon")
+}
+
+model UbsClient {
+  id         String       @id @default(uuid(7))
+  name       String       @db.VarChar(255)
+  email      String?      @db.VarChar(255)
+  phone      String?      @db.VarChar(20)
+  mobile     String?      @db.VarChar(20)
+  address    String?      @db.VarChar(650)
+  location   String?      @db.VarChar(255)
+  type       requestType  @default(INTERNAL)
+  status     Boolean      @default(true)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  UbsRequest UbsRequest[]
+
+  @@map("ubs_client")
+}
+
+model UbsRequest {
+  id           String        @id @default(uuid(7))
+  clientId     String?
+  title        String        @db.VarChar(255)
+  description  String?       @db.VarChar(255)
+  status       requestStatus @default(PENDED)
+  chargeAmount Float?
+  bookStart    DateTime?
+  bookEnd      DateTime?
+  bookDuration Int?
+  createdBy    Int?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  client     UbsClient?   @relation(fields: [clientId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  creator    user?        @relation(fields: [createdBy], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  payment    UbsPayment[]
+  packages   UbsPackage[]
+  lockedItem UbsItem[]
+
+  @@map("ubs_request")
+}
+
+model UbsPayment {
+  id          String   @id @default(uuid(7))
+  requestId   String?
+  description String?  @db.VarChar(255)
+  paidName    String?  @db.VarChar(255)
+  paidRef     String?  @db.VarChar(100)
+  paidAmount  Float?
+  paidAt      DateTime @default(now())
+  createdBy   Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  status Boolean @default(true)
+
+  request UbsRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  creator user?       @relation(fields: [createdBy], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@map("ubs_payment")
+}
+
+model UbsReceiver {
+  id        String   @id @default(uuid(7))
+  identity  String?  @db.VarChar(20)
+  name      String   @db.VarChar(255)
+  phone     String?  @db.VarChar(20)
+  role      String?  @db.VarChar(100)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ubs_receiver")
+}

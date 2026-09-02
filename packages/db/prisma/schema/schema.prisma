@@ -1,0 +1,18 @@
+generator client {
+  provider      = "prisma-client"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+  output        = "../generated/client"
+  moduleFormat  = "esm"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// Shared identity enum (sso.prisma `provider` model)
+enum AccountType {
+  LINKEDIN
+  GOOGLE
+  CREDENTIAL
+  PIN
+}

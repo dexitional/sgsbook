@@ -1,0 +1,14 @@
+node_modules/
+.turbo/
+dist/
+.output/
+.vinxi/
+build/
+*.log
+.env
+.env.local
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+apps/*/prisma/generated/
+packages/*/prisma/generated/

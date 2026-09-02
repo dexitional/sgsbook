@@ -1,0 +1,102 @@
+// SSO / RBAC — trimmed from upload/schema.prisma's SSO section.
+// Powers admin (staff) identity only. Customer identity lives in auth.prisma
+// (Better-auth, Google-only). Kept deliberately separate per plan decision.
+
+model app {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(300)
+  tag         String   @unique @db.VarChar(50)
+  description String   @db.VarChar(300)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  appRole  appRole[]
+  provider provider[]
+
+  @@map("sso_app")
+}
+
+model appRole {
+  id          Int      @id @default(autoincrement())
+  appId       Int
+  title       String   @db.VarChar(300)
+  description String   @db.VarChar(300)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  app      app?       @relation(fields: [appId], references: [id])
+  userRole userRole[]
+
+  @@map("sso_arole")
+}
+
+model group {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(300)
+  description String   @db.VarChar(300)
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user user[]
+
+  @@map("sso_group")
+}
+
+model user {
+  id        Int      @id @default(autoincrement())
+  groupId   Int
+  tag       String   @unique @db.VarChar(50)
+  username  String   @db.VarChar(50)
+  name      String?  @db.VarChar(150)
+  // NOTE: widened from the draft's VarChar(50) — a bcrypt hash is 60 chars
+  // and would silently truncate/corrupt at 50. umsa hit this exact issue;
+  // their live sso_user.password column is 255.
+  password  String   @db.VarChar(255)
+  unlockPin String?  @db.VarChar(4)
+  locked    Boolean  @default(false)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  group group? @relation(fields: [groupId], references: [id])
+
+  userRole   userRole[]
+  provider   provider[]
+  UbsRequest UbsRequest[]
+  UbsPayment UbsPayment[]
+  aiMessages UbsAiMessage[]
+
+  @@map("sso_user")
+}
+
+model userRole {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  appRoleId Int
+  roleMeta  String   @db.VarChar(255)
+  status    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    user?    @relation(fields: [userId], references: [id])
+  appRole appRole? @relation(fields: [appRoleId], references: [id])
+
+  @@map("sso_urole")
+}
+
+model provider {
+  providerId    Int         @id @default(autoincrement())
+  userId        Int?
+  apps          app[]
+  accountType   AccountType
+  accountId     String?
+  accountSecret String?
+  status        Boolean     @default(true)
+
+  user user? @relation(fields: [userId], references: [id])
+
+  @@map("sso_provider")
+}

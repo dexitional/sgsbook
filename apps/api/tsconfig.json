@@ -1,0 +1,10 @@
+{
+  "extends": "@sgs/tsconfig/node-lib.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "noEmit": false
+  },
+  "include": ["src"]
+}

@@ -10,10 +10,17 @@ git pull
 echo "==> npm ci"
 npm ci
 
-echo "==> prisma generate (packages/db/.env must exist with a real DATABASE_URL)"
-if [ ! -f packages/db/.env ]; then
-  echo "packages/db/.env is missing — copying from apps/api/.env.production" >&2
-  cp apps/api/.env.production packages/db/.env
+echo "==> prisma generate"
+# Export DATABASE_URL directly into this process instead of relying on
+# prisma.config.ts's dotenv/config to find packages/db/.env on its own —
+# that file-lookup depends on cwd matching exactly, which has been a
+# recurring source of "Cannot resolve environment variable" failures.
+set -a
+source apps/api/.env.production
+set +a
+if [ -z "${DATABASE_URL:-}" ]; then
+  echo "DATABASE_URL is empty after sourcing apps/api/.env.production — fix that file first" >&2
+  exit 1
 fi
 npm run db:generate -w packages/db
 

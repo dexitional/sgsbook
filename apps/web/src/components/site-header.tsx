@@ -5,6 +5,7 @@ import { IconButton, useThemeStore } from "@sgs/ui";
 import { Button } from "#/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "#/components/ui/sheet";
 import { authClient } from "#/lib/auth-client";
+import { asset } from "#/lib/asset";
 
 const NAV_LINKS = [
   { href: "#facilities", label: "Facilities" },
@@ -33,7 +34,7 @@ export function SiteHeader() {
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
         <Link to="/" className="flex min-w-0 items-center gap-2">
-          <img src="/logo.webp" alt="" className="h-7 w-7 shrink-0 object-contain sm:h-8 sm:w-8" />
+          <img src={asset("logo.webp")} alt="" className="h-7 w-7 shrink-0 object-contain sm:h-8 sm:w-8" />
           <span
             className="truncate text-xl tracking-wide text-primary sm:text-2xl lg:text-3xl"
             style={{ fontFamily: '"Engagement", cursive' }}

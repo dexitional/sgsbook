@@ -11,6 +11,7 @@ import { ThemeProvider, themeInitScript } from '@sgs/ui'
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import appCss from '../styles.css?url'
+import { asset } from '#/lib/asset'
 
 import type { QueryClient } from '@tanstack/react-query'
 
@@ -36,7 +37,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         rel: 'icon',
         type: 'image/webp',
-        href: '/logo.webp',
+        href: asset('logo.webp'),
       },
       {
         rel: 'stylesheet',

@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback } from "#/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "#/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "#/components/ui/sheet";
 import { CommandPalette } from "#/components/command-palette";
+import { asset } from "#/lib/asset";
 import { AiInsightsPanel } from "#/components/ai-insights-panel";
 import { useAdminSession, useLogout } from "#/lib/queries/session";
 import { useThemeStore, IconButton } from "@sgs/ui";
@@ -81,7 +82,7 @@ function AdminLayout() {
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-card md:flex">
         <div className="flex h-16 items-center gap-2 border-b border-border px-5">
-          <img src="/logo.webp" alt="" className="h-8 w-8 shrink-0 object-contain" />
+          <img src={asset("logo.webp")} alt="" className="h-8 w-8 shrink-0 object-contain" />
           <span
             className="truncate text-[1.375rem] tracking-wider text-primary"
             style={{ fontFamily: '"Engagement", cursive' }}
@@ -109,7 +110,7 @@ function AdminLayout() {
               <SheetContent side="left" className="w-64">
                 <SheetHeader>
                   <div className="flex items-center gap-2">
-                    <img src="/logo.webp" alt="" className="h-6 w-6 shrink-0 object-contain" />
+                    <img src={asset("logo.webp")} alt="" className="h-6 w-6 shrink-0 object-contain" />
                     <SheetTitle
                       className="truncate text-lg text-primary"
                       style={{ fontFamily: '"Engagement", cursive' }}
@@ -126,7 +127,7 @@ function AdminLayout() {
                 </SheetFooter>
               </SheetContent>
             </Sheet>
-            <img src="/logo.webp" alt="" className="h-7 w-7 shrink-0 object-contain" />
+            <img src={asset("logo.webp")} alt="" className="h-7 w-7 shrink-0 object-contain" />
             <span
               className="truncate text-lg tracking-wider text-primary"
               style={{ fontFamily: '"Engagement", cursive' }}

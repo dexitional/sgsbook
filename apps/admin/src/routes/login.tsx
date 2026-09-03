@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useLogin } from "#/lib/queries/session";
 import { ApiError } from "#/lib/api-client";
+import { asset } from "#/lib/asset";
 
 export const Route = createFileRoute("/login")({ component: LoginPage });
 
@@ -35,7 +36,7 @@ function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-[#f3f3f3] px-4" style={{ fontFamily: SEGOE_STACK }}>
       <div className="w-full max-w-[380px] bg-white px-9 py-10 shadow-[0_2px_6px_rgba(0,0,0,0.2)]">
         <div className="flex items-center gap-2">
-          <img src="/logo.webp" alt="" className="h-8 w-8 object-contain" />
+          <img src={asset("logo.webp")} alt="" className="h-8 w-8 object-contain" />
           <span className="text-[15px] font-semibold text-[#1b1b1b]">SGS Booking System</span>
         </div>
 

@@ -4,6 +4,7 @@ import { Printer } from "lucide-react";
 import { computeDays } from "@sgs/ui";
 import { Button } from "#/components/ui/button";
 import { usePayment } from "#/lib/queries/payments";
+import { asset } from "#/lib/asset";
 
 export const Route = createFileRoute("/invoices/$paymentId/print")({ component: PrintPaymentReceiptPage });
 
@@ -35,7 +36,7 @@ function PrintPaymentReceiptPage() {
       <div className="rounded-xl border border-border bg-card p-10 shadow-sm print:border-0 print:shadow-none">
         <div className="flex items-start justify-between border-b border-border pb-6">
           <div className="flex items-center gap-3">
-            <img src="/logo.webp" alt="" className="h-10 w-10 object-contain" />
+            <img src={asset("logo.webp")} alt="" className="h-10 w-10 object-contain" />
             <div>
               <p className="font-semibold">School of Graduate Studies</p>
               <p className="text-xs text-muted-foreground">Facilities Booking System</p>

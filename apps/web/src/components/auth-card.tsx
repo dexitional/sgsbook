@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "#/components/ui/button";
 import { GoogleIcon } from "#/components/google-icon";
 import { authClient } from "#/lib/auth-client";
+import { asset } from "#/lib/asset";
 
 export function AuthCard({ title, subtitle }: { title: string; subtitle: string }) {
   const [loading, setLoading] = useState(false);
@@ -24,7 +25,7 @@ export function AuthCard({ title, subtitle }: { title: string; subtitle: string 
 
       <div className="w-full max-w-sm space-y-6 rounded-xl border border-border bg-card p-8 shadow-lg shadow-black/5">
         <div className="flex flex-col items-center gap-2 text-center">
-          <img src="/logo.webp" alt="" className="h-12 w-12 object-contain" />
+          <img src={asset("logo.webp")} alt="" className="h-12 w-12 object-contain" />
           <h1 className="text-xl font-semibold">{title}</h1>
           <p className="text-sm text-muted-foreground">{subtitle}</p>
         </div>

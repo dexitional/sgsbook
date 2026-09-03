@@ -6,6 +6,7 @@ import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { useRequest } from "#/lib/queries/requests";
 import type { RequestStatus } from "#/lib/types";
+import { asset } from "#/lib/asset";
 
 export const Route = createFileRoute("/requests/$requestId/print")({ component: PrintRequestInvoicePage });
 
@@ -43,7 +44,7 @@ function PrintRequestInvoicePage() {
       <div className="rounded-xl border border-border bg-card p-10 shadow-sm print:border-0 print:shadow-none">
         <div className="flex items-start justify-between border-b border-border pb-6">
           <div className="flex items-center gap-3">
-            <img src="/logo.webp" alt="" className="h-10 w-10 object-contain" />
+            <img src={asset("logo.webp")} alt="" className="h-10 w-10 object-contain" />
             <div>
               <p className="font-semibold">School of Graduate Studies</p>
               <p className="text-xs text-muted-foreground">Facilities Booking System</p>

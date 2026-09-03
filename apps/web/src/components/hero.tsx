@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { CalendarCheck } from "lucide-react";
 import { Button } from "#/components/ui/button";
 import { StartBookingButton } from "#/components/start-booking-button";
+import { asset } from "#/lib/asset";
 
 export function Hero() {
   return (
@@ -75,7 +76,7 @@ function BannerBackground() {
   return (
     <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden bg-[#0b1220]">
       <motion.img
-        src="/banner.jpg"
+        src={asset("banner.jpg")}
         alt=""
         className="size-full object-cover"
         initial={{ scale: 1.08 }}

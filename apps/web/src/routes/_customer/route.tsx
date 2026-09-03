@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger
 import { IconButton, useThemeStore } from "@sgs/ui";
 import { getCurrentCustomer } from "#/server/customer";
 import { authClient } from "#/lib/auth-client";
+import { asset } from "#/lib/asset";
 
 export const Route = createFileRoute("/_customer")({ component: CustomerLayout });
 
@@ -74,7 +75,7 @@ function CustomerLayout() {
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-card md:flex">
         <Link to="/" className="flex h-16 min-w-0 items-center gap-2 border-b border-border px-5">
-          <img src="/logo.webp" alt="" className="h-8 w-8 shrink-0 object-contain" />
+          <img src={asset("logo.webp")} alt="" className="h-8 w-8 shrink-0 object-contain" />
           <span
             className="truncate text-[1.375rem] tracking-wider text-primary"
             style={{ fontFamily: '"Engagement", cursive' }}
@@ -101,7 +102,7 @@ function CustomerLayout() {
             <SheetContent side="left" className="w-64">
               <SheetHeader>
                 <div className="flex items-center gap-2">
-                  <img src="/logo.webp" alt="" className="h-6 w-6 shrink-0 object-contain" />
+                  <img src={asset("logo.webp")} alt="" className="h-6 w-6 shrink-0 object-contain" />
                   <SheetTitle
                     className="truncate text-lg text-primary"
                     style={{ fontFamily: '"Engagement", cursive' }}
@@ -120,7 +121,7 @@ function CustomerLayout() {
           </Sheet>
 
           <div className="flex min-w-0 items-center gap-2 md:hidden">
-            <img src="/logo.webp" alt="" className="h-7 w-7 shrink-0 object-contain" />
+            <img src={asset("logo.webp")} alt="" className="h-7 w-7 shrink-0 object-contain" />
             <span
               className="truncate text-[1.375rem] tracking-wider text-primary"
               style={{ fontFamily: '"Engagement", cursive' }}

@@ -24,8 +24,18 @@ if [ -z "${DATABASE_URL:-}" ]; then
 fi
 npm run db:generate -w packages/db
 
-echo "==> prisma migrate deploy"
-npm run db:deploy -w packages/db
+echo "==> prisma db push"
+# This project has never used tracked migrations (no packages/db/prisma/migrations
+# directory exists) — every schema change so far, including adding user.name,
+# was applied via `db push` directly. `prisma migrate deploy` is a silent
+# no-op here since there are no migration files for it to apply — confirmed
+# the hard way when a push-only column change never reached production.
+# db push prompts interactively only when it detects potential data loss
+# (dropping a column, an incompatible type change); safe/additive changes
+# apply without asking. Deliberately NOT passing --accept-data-loss here —
+# if it does prompt, that's exactly the case where a human should look
+# before continuing, not something to force through automatically.
+npm run db:push -w packages/db
 
 echo "==> build apps/app"
 # env vars used at build time (DATABASE_URL for prisma generate above,

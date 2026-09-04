@@ -1,19 +1,17 @@
-// PM2 process definitions for the bare-metal deploy — build once, then run
-// the built output under PM2 instead of `vite dev`/`tsx watch`.
+// PM2 process definition for the merged app — build once, run the built
+// output under PM2 with plain node.
 //
-// apps/web and apps/admin are TanStack Start (Nitro) apps: `npm run build`
-// produces a self-contained `.output/server/index.mjs` — PM2 just runs that
-// directly with plain node, no interpreter tricks needed.
+// Unlike the old standalone apps/api, this no longer needs the tsx
+// workaround: Hono's modules are now part of apps/app's own Vite/Nitro
+// build, which fully bundles workspace deps (including @sgs/db, which is
+// TypeScript-source-only) the same way apps/web's server functions already
+// did — so .output/server/index.mjs is self-contained, same as any other
+// Nitro node-server build.
 //
-// apps/api has no viable "build once, run with plain node" path: @sgs/db is
-// TypeScript-only (no build step of its own), so even after `tsc` compiles
-// apps/api itself, plain `node dist/index.js` can't resolve the `@sgs/db`
-// import (confirmed: throws ERR_MODULE_NOT_FOUND). Same fix as the Docker
-// setup — run it through `tsx` directly, in prod as in dev.
-//
-// Each app's own `apps/*/.env.production` is the source of truth for its
-// runtime secrets; this file only loads and hands them to PM2 (nothing here
-// is committed with real values).
+// apps/app/.env.production is the source of truth for runtime secrets
+// (the union of what used to be split across apps/web, apps/admin, and
+// apps/api's own .env.production files); this file only loads and hands
+// them to PM2 (nothing here is committed with real values).
 const fs = require("fs");
 const path = require("path");
 const dotenv = require("dotenv");
@@ -26,23 +24,10 @@ function loadEnv(relPath) {
 module.exports = {
   apps: [
     {
-      name: "sgs-api",
-      cwd: path.join(__dirname, "apps/api"),
-      script: path.join(__dirname, "node_modules/.bin/tsx"),
-      args: "src/index.ts",
-      env: loadEnv("apps/api/.env.production"),
-    },
-    {
-      name: "sgs-web",
-      cwd: path.join(__dirname, "apps/web/.output/server"),
+      name: "sgs-app",
+      cwd: path.join(__dirname, "apps/app/.output/server"),
       script: "index.mjs",
-      env: { PORT: "3000", ...loadEnv("apps/web/.env.production") },
-    },
-    {
-      name: "sgs-admin",
-      cwd: path.join(__dirname, "apps/admin/.output/server"),
-      script: "index.mjs",
-      env: { PORT: "3001", ...loadEnv("apps/admin/.env.production") },
+      env: { PORT: "3000", ...loadEnv("apps/app/.env.production") },
     },
   ],
 };

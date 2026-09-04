@@ -16,10 +16,10 @@ echo "==> prisma generate"
 # that file-lookup depends on cwd matching exactly, which has been a
 # recurring source of "Cannot resolve environment variable" failures.
 set -a
-source apps/api/.env.production
+source apps/app/.env.production
 set +a
 if [ -z "${DATABASE_URL:-}" ]; then
-  echo "DATABASE_URL is empty after sourcing apps/api/.env.production — fix that file first" >&2
+  echo "DATABASE_URL is empty after sourcing apps/app/.env.production — fix that file first" >&2
   exit 1
 fi
 npm run db:generate -w packages/db
@@ -27,21 +27,16 @@ npm run db:generate -w packages/db
 echo "==> prisma migrate deploy"
 npm run db:deploy -w packages/db
 
-echo "==> build apps/web (VITE_API_URL/DATABASE_URL from apps/web/.env.production)"
-set -a
-source apps/web/.env.production
-set +a
-npm run build -w apps/web
+echo "==> build apps/app"
+# env vars used at build time (DATABASE_URL for prisma generate above,
+# already exported) are already in this shell's environment via the
+# source above — no separate VITE_API_URL/VITE_BASE_PATH needed anymore,
+# the merged app calls /sgs-api as a same-origin relative path and builds
+# with a fixed base of "/".
+npm run build -w apps/app
 
-echo "==> build apps/admin (VITE_API_URL from apps/admin/.env.production)"
-set -a
-source apps/admin/.env.production
-set +a
-npm run build -w apps/admin
-
-echo "==> verify build outputs exist before touching pm2"
-test -f apps/web/.output/server/index.mjs || { echo "web build missing .output/server/index.mjs" >&2; exit 1; }
-test -f apps/admin/.output/server/index.mjs || { echo "admin build missing .output/server/index.mjs" >&2; exit 1; }
+echo "==> verify build output exists before touching pm2"
+test -f apps/app/.output/server/index.mjs || { echo "build missing .output/server/index.mjs" >&2; exit 1; }
 test -f packages/db/prisma/generated/client/client.js || { echo "prisma client was not generated" >&2; exit 1; }
 
 echo "==> pm2 reload"

@@ -94,6 +94,8 @@ export interface UserAccount {
   tag: string;
   username: string;
   name: string | null;
+  email: string | null;
+  phone: string | null;
   locked: boolean;
   status: boolean;
   createdAt: string;

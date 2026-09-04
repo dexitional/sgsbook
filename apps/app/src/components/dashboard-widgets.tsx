@@ -95,7 +95,7 @@ export function MonthlyBalanceCard({ payments }: { payments: Payment[] }) {
 
         <div className="mt-auto border-t border-border pt-3">
           <Button asChild variant="outline" className="w-full border-primary/50 bg-transparent text-primary hover:bg-primary hover:text-primary-foreground">
-            <Link to="/sgs-admin/payments">
+            <Link to="/admin/payments">
               View full report
               <ArrowUpRight className="size-4" />
             </Link>
@@ -143,7 +143,7 @@ export function MonthlyRevenueCard({ payments }: { payments: Payment[] }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link to="/sgs-admin/payments">View payments</Link>
+              <Link to="/admin/payments">View payments</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

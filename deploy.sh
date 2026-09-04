@@ -41,7 +41,7 @@ echo "==> build apps/app"
 # env vars used at build time (DATABASE_URL for prisma generate above,
 # already exported) are already in this shell's environment via the
 # source above — no separate VITE_API_URL/VITE_BASE_PATH needed anymore,
-# the merged app calls /sgs-api as a same-origin relative path and builds
+# the merged app calls /api as a same-origin relative path and builds
 # with a fixed base of "/".
 npm run build -w apps/app
 

@@ -1,7 +1,7 @@
 // The Hono app instance, folded into the merged TanStack Start server —
 // same routes/middleware/handlers as the old standalone apps/api, minus the
 // @hono/node-server listener (Nitro handles serving now). Mounted at
-// /sgs-api/* by routes/sgs-api/$.ts, which strips that prefix before calling
+// /api/* by routes/api/$.ts, which strips that prefix before calling
 // .fetch() here — see that file for why (Hono's own routes below are
 // registered unprefixed, and app.basePath() can't retroactively rewrite
 // already-registered routes).

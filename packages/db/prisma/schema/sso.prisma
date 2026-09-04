@@ -51,6 +51,8 @@ model user {
   tag       String   @unique @db.VarChar(50)
   username  String   @db.VarChar(50)
   name      String?  @db.VarChar(150)
+  email     String?  @db.VarChar(255)
+  phone     String?  @db.VarChar(20)
   // NOTE: widened from the draft's VarChar(50) — a bcrypt hash is 60 chars
   // and would silently truncate/corrupt at 50. umsa hit this exact issue;
   // their live sso_user.password column is 255.

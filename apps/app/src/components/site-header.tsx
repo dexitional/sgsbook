@@ -33,7 +33,7 @@ export function SiteHeader() {
       }`}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
-        <Link to="/sgs" className="flex min-w-0 items-center gap-2">
+        <Link to="/" className="flex min-w-0 items-center gap-2">
           <img src={asset("logo.webp")} alt="" className="h-7 w-7 shrink-0 object-contain sm:h-8 sm:w-8" />
           <span
             className="truncate text-xl tracking-wide text-primary sm:text-2xl lg:text-3xl"
@@ -55,15 +55,15 @@ export function SiteHeader() {
           <ThemeToggle />
           {session?.user ? (
             <Button asChild size="sm">
-              <Link to="/sgs/dashboard">Dashboard</Link>
+              <Link to="/dashboard">Dashboard</Link>
             </Button>
           ) : (
             <>
               <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-                <Link to="/sgs/signin">Sign in</Link>
+                <Link to="/signin">Sign in</Link>
               </Button>
               <Button asChild size="sm">
-                <Link to="/sgs/signup">Get started</Link>
+                <Link to="/signup">Get started</Link>
               </Button>
             </>
           )}
@@ -96,7 +96,7 @@ export function SiteHeader() {
                 ))}
                 {!session?.user && (
                   <Link
-                    to="/sgs/signin"
+                    to="/signin"
                     onClick={() => setMobileOpen(false)}
                     className="rounded-md px-3 py-2.5 text-base font-medium text-foreground transition-colors hover:bg-secondary"
                   >

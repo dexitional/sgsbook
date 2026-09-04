@@ -9,7 +9,7 @@ type LetterStyle = CSSProperties & { "--i"?: number };
 
 export function StartBookingButton() {
   return (
-    <Link to="/sgs/signup" className="cta-button">
+    <Link to="/signup" className="cta-button">
       <span className="cta-button__outline" aria-hidden />
       <span className="cta-button__icon">
         <Send />

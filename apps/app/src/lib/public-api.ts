@@ -1,4 +1,4 @@
-const API_URL = "/sgs-api";
+const API_URL = "/api";
 
 export interface PublicFacility {
   id: string;

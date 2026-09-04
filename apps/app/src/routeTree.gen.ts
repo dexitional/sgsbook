@@ -9,513 +9,510 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SgsAdminAdminRouteRouteImport } from './routes/sgs-admin/_admin/route'
-import { Route as SgsAdminLoginRouteImport } from './routes/sgs-admin/login'
-import { Route as SgsApiSplatRouteImport } from './routes/sgs-api/$'
-import { Route as SgsCustomerRouteRouteImport } from './routes/sgs/_customer/route'
-import { Route as SgsAdminAdminIndexRouteImport } from './routes/sgs-admin/_admin/index'
-import { Route as SgsAdminAdminClientsRouteImport } from './routes/sgs-admin/_admin/clients'
-import { Route as SgsAdminAdminItemsRouteImport } from './routes/sgs-admin/_admin/items'
-import { Route as SgsAdminAdminPaymentsRouteImport } from './routes/sgs-admin/_admin/payments'
-import { Route as SgsAdminAdminRequestsRouteImport } from './routes/sgs-admin/_admin/requests'
-import { Route as SgsAdminAdminUsersRouteImport } from './routes/sgs-admin/_admin/users'
-import { Route as SgsCustomerDashboardRouteImport } from './routes/sgs/_customer/dashboard'
-import { Route as SgsCustomerReceiptsRouteImport } from './routes/sgs/_customer/receipts'
-import { Route as SgsCustomerRequestsRouteImport } from './routes/sgs/_customer/requests'
-import { Route as SgsWebIndexRouteImport } from './routes/sgs/_web/index'
-import { Route as SgsWebOnboardingRouteImport } from './routes/sgs/_web/onboarding'
-import { Route as SgsWebSigninRouteImport } from './routes/sgs/_web/signin'
-import { Route as SgsWebSignupRouteImport } from './routes/sgs/_web/signup'
-import { Route as SgsAdminInvoicesPaymentIdPrintRouteImport } from './routes/sgs-admin/invoices/$paymentId/print'
-import { Route as SgsAdminRequestsRequestIdPrintRouteImport } from './routes/sgs-admin/requests/$requestId/print'
-import { Route as SgsApiAuthSplatRouteImport } from './routes/sgs/api/auth/$'
-import { Route as SgsInvoicesPaymentIdPrintRouteImport } from './routes/sgs/invoices/$paymentId/print'
-import { Route as SgsRequestsRequestIdPrintRouteImport } from './routes/sgs/requests/$requestId/print'
+import { Route as CustomerRouteRouteImport } from './routes/_customer/route'
+import { Route as CustomerDashboardRouteImport } from './routes/_customer/dashboard'
+import { Route as CustomerReceiptsRouteImport } from './routes/_customer/receipts'
+import { Route as CustomerRequestsRouteImport } from './routes/_customer/requests'
+import { Route as WebIndexRouteImport } from './routes/_web/index'
+import { Route as WebOnboardingRouteImport } from './routes/_web/onboarding'
+import { Route as WebSigninRouteImport } from './routes/_web/signin'
+import { Route as WebSignupRouteImport } from './routes/_web/signup'
+import { Route as AdminAdminRouteRouteImport } from './routes/admin/_admin/route'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as ApiSplatRouteImport } from './routes/api/$'
+import { Route as AdminAdminIndexRouteImport } from './routes/admin/_admin/index'
+import { Route as AdminAdminClientsRouteImport } from './routes/admin/_admin/clients'
+import { Route as AdminAdminItemsRouteImport } from './routes/admin/_admin/items'
+import { Route as AdminAdminPaymentsRouteImport } from './routes/admin/_admin/payments'
+import { Route as AdminAdminRequestsRouteImport } from './routes/admin/_admin/requests'
+import { Route as AdminAdminUsersRouteImport } from './routes/admin/_admin/users'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as InvoicesPaymentIdPrintRouteImport } from './routes/invoices/$paymentId/print'
+import { Route as RequestsRequestIdPrintRouteImport } from './routes/requests/$requestId/print'
+import { Route as AdminInvoicesPaymentIdPrintRouteImport } from './routes/admin/invoices/$paymentId/print'
+import { Route as AdminRequestsRequestIdPrintRouteImport } from './routes/admin/requests/$requestId/print'
 
-const SgsAdminAdminRouteRoute = SgsAdminAdminRouteRouteImport.update({
-  id: '/sgs-admin/_admin',
-  path: '/sgs-admin',
+const CustomerRouteRoute = CustomerRouteRouteImport.update({
+  id: '/_customer',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SgsAdminLoginRoute = SgsAdminLoginRouteImport.update({
-  id: '/sgs-admin/login',
-  path: '/sgs-admin/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SgsApiSplatRoute = SgsApiSplatRouteImport.update({
-  id: '/sgs-api/$',
-  path: '/sgs-api/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SgsCustomerRouteRoute = SgsCustomerRouteRouteImport.update({
-  id: '/sgs/_customer',
-  path: '/sgs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SgsAdminAdminIndexRoute = SgsAdminAdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => SgsAdminAdminRouteRoute,
-} as any)
-const SgsAdminAdminClientsRoute = SgsAdminAdminClientsRouteImport.update({
-  id: '/clients',
-  path: '/clients',
-  getParentRoute: () => SgsAdminAdminRouteRoute,
-} as any)
-const SgsAdminAdminItemsRoute = SgsAdminAdminItemsRouteImport.update({
-  id: '/items',
-  path: '/items',
-  getParentRoute: () => SgsAdminAdminRouteRoute,
-} as any)
-const SgsAdminAdminPaymentsRoute = SgsAdminAdminPaymentsRouteImport.update({
-  id: '/payments',
-  path: '/payments',
-  getParentRoute: () => SgsAdminAdminRouteRoute,
-} as any)
-const SgsAdminAdminRequestsRoute = SgsAdminAdminRequestsRouteImport.update({
-  id: '/requests',
-  path: '/requests',
-  getParentRoute: () => SgsAdminAdminRouteRoute,
-} as any)
-const SgsAdminAdminUsersRoute = SgsAdminAdminUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => SgsAdminAdminRouteRoute,
-} as any)
-const SgsCustomerDashboardRoute = SgsCustomerDashboardRouteImport.update({
+const CustomerDashboardRoute = CustomerDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => SgsCustomerRouteRoute,
+  getParentRoute: () => CustomerRouteRoute,
 } as any)
-const SgsCustomerReceiptsRoute = SgsCustomerReceiptsRouteImport.update({
+const CustomerReceiptsRoute = CustomerReceiptsRouteImport.update({
   id: '/receipts',
   path: '/receipts',
-  getParentRoute: () => SgsCustomerRouteRoute,
+  getParentRoute: () => CustomerRouteRoute,
 } as any)
-const SgsCustomerRequestsRoute = SgsCustomerRequestsRouteImport.update({
+const CustomerRequestsRoute = CustomerRequestsRouteImport.update({
   id: '/requests',
   path: '/requests',
-  getParentRoute: () => SgsCustomerRouteRoute,
+  getParentRoute: () => CustomerRouteRoute,
 } as any)
-const SgsWebIndexRoute = SgsWebIndexRouteImport.update({
-  id: '/sgs/_web/',
-  path: '/sgs/',
+const WebIndexRoute = WebIndexRouteImport.update({
+  id: '/_web/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SgsWebOnboardingRoute = SgsWebOnboardingRouteImport.update({
-  id: '/sgs/_web/onboarding',
-  path: '/sgs/onboarding',
+const WebOnboardingRoute = WebOnboardingRouteImport.update({
+  id: '/_web/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SgsWebSigninRoute = SgsWebSigninRouteImport.update({
-  id: '/sgs/_web/signin',
-  path: '/sgs/signin',
+const WebSigninRoute = WebSigninRouteImport.update({
+  id: '/_web/signin',
+  path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SgsWebSignupRoute = SgsWebSignupRouteImport.update({
-  id: '/sgs/_web/signup',
-  path: '/sgs/signup',
+const WebSignupRoute = WebSignupRouteImport.update({
+  id: '/_web/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SgsAdminInvoicesPaymentIdPrintRoute =
-  SgsAdminInvoicesPaymentIdPrintRouteImport.update({
-    id: '/sgs-admin/invoices/$paymentId/print',
-    path: '/sgs-admin/invoices/$paymentId/print',
+const AdminAdminRouteRoute = AdminAdminRouteRouteImport.update({
+  id: '/admin/_admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSplatRoute = ApiSplatRouteImport.update({
+  id: '/api/$',
+  path: '/api/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAdminIndexRoute = AdminAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
+const AdminAdminClientsRoute = AdminAdminClientsRouteImport.update({
+  id: '/clients',
+  path: '/clients',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
+const AdminAdminItemsRoute = AdminAdminItemsRouteImport.update({
+  id: '/items',
+  path: '/items',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
+const AdminAdminPaymentsRoute = AdminAdminPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
+const AdminAdminRequestsRoute = AdminAdminRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
+const AdminAdminUsersRoute = AdminAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvoicesPaymentIdPrintRoute = InvoicesPaymentIdPrintRouteImport.update({
+  id: '/invoices/$paymentId/print',
+  path: '/invoices/$paymentId/print',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RequestsRequestIdPrintRoute = RequestsRequestIdPrintRouteImport.update({
+  id: '/requests/$requestId/print',
+  path: '/requests/$requestId/print',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminInvoicesPaymentIdPrintRoute =
+  AdminInvoicesPaymentIdPrintRouteImport.update({
+    id: '/admin/invoices/$paymentId/print',
+    path: '/admin/invoices/$paymentId/print',
     getParentRoute: () => rootRouteImport,
   } as any)
-const SgsAdminRequestsRequestIdPrintRoute =
-  SgsAdminRequestsRequestIdPrintRouteImport.update({
-    id: '/sgs-admin/requests/$requestId/print',
-    path: '/sgs-admin/requests/$requestId/print',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const SgsApiAuthSplatRoute = SgsApiAuthSplatRouteImport.update({
-  id: '/sgs/api/auth/$',
-  path: '/sgs/api/auth/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SgsInvoicesPaymentIdPrintRoute =
-  SgsInvoicesPaymentIdPrintRouteImport.update({
-    id: '/sgs/invoices/$paymentId/print',
-    path: '/sgs/invoices/$paymentId/print',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const SgsRequestsRequestIdPrintRoute =
-  SgsRequestsRequestIdPrintRouteImport.update({
-    id: '/sgs/requests/$requestId/print',
-    path: '/sgs/requests/$requestId/print',
+const AdminRequestsRequestIdPrintRoute =
+  AdminRequestsRequestIdPrintRouteImport.update({
+    id: '/admin/requests/$requestId/print',
+    path: '/admin/requests/$requestId/print',
     getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/sgs-admin': typeof SgsAdminAdminRouteRouteWithChildren
-  '/sgs': typeof SgsCustomerRouteRouteWithChildren
-  '/sgs-admin/login': typeof SgsAdminLoginRoute
-  '/sgs-api/$': typeof SgsApiSplatRoute
-  '/sgs-admin/clients': typeof SgsAdminAdminClientsRoute
-  '/sgs-admin/items': typeof SgsAdminAdminItemsRoute
-  '/sgs-admin/payments': typeof SgsAdminAdminPaymentsRoute
-  '/sgs-admin/requests': typeof SgsAdminAdminRequestsRoute
-  '/sgs-admin/users': typeof SgsAdminAdminUsersRoute
-  '/sgs/dashboard': typeof SgsCustomerDashboardRoute
-  '/sgs/receipts': typeof SgsCustomerReceiptsRoute
-  '/sgs/requests': typeof SgsCustomerRequestsRoute
-  '/sgs/onboarding': typeof SgsWebOnboardingRoute
-  '/sgs/signin': typeof SgsWebSigninRoute
-  '/sgs/signup': typeof SgsWebSignupRoute
-  '/sgs-admin/': typeof SgsAdminAdminIndexRoute
-  '/sgs/': typeof SgsWebIndexRoute
-  '/sgs-admin/invoices/$paymentId/print': typeof SgsAdminInvoicesPaymentIdPrintRoute
-  '/sgs-admin/requests/$requestId/print': typeof SgsAdminRequestsRequestIdPrintRoute
-  '/sgs/api/auth/$': typeof SgsApiAuthSplatRoute
-  '/sgs/invoices/$paymentId/print': typeof SgsInvoicesPaymentIdPrintRoute
-  '/sgs/requests/$requestId/print': typeof SgsRequestsRequestIdPrintRoute
+  '/': typeof WebIndexRoute
+  '/admin': typeof AdminAdminRouteRouteWithChildren
+  '/dashboard': typeof CustomerDashboardRoute
+  '/receipts': typeof CustomerReceiptsRoute
+  '/requests': typeof CustomerRequestsRoute
+  '/onboarding': typeof WebOnboardingRoute
+  '/signin': typeof WebSigninRoute
+  '/signup': typeof WebSignupRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/api/$': typeof ApiSplatRoute
+  '/admin/clients': typeof AdminAdminClientsRoute
+  '/admin/items': typeof AdminAdminItemsRoute
+  '/admin/payments': typeof AdminAdminPaymentsRoute
+  '/admin/requests': typeof AdminAdminRequestsRoute
+  '/admin/users': typeof AdminAdminUsersRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/invoices/$paymentId/print': typeof InvoicesPaymentIdPrintRoute
+  '/requests/$requestId/print': typeof RequestsRequestIdPrintRoute
+  '/admin/': typeof AdminAdminIndexRoute
+  '/admin/invoices/$paymentId/print': typeof AdminInvoicesPaymentIdPrintRoute
+  '/admin/requests/$requestId/print': typeof AdminRequestsRequestIdPrintRoute
 }
 export interface FileRoutesByTo {
-  '/sgs': typeof SgsWebIndexRoute
-  '/sgs-admin/login': typeof SgsAdminLoginRoute
-  '/sgs-api/$': typeof SgsApiSplatRoute
-  '/sgs-admin/clients': typeof SgsAdminAdminClientsRoute
-  '/sgs-admin/items': typeof SgsAdminAdminItemsRoute
-  '/sgs-admin/payments': typeof SgsAdminAdminPaymentsRoute
-  '/sgs-admin/requests': typeof SgsAdminAdminRequestsRoute
-  '/sgs-admin/users': typeof SgsAdminAdminUsersRoute
-  '/sgs/dashboard': typeof SgsCustomerDashboardRoute
-  '/sgs/receipts': typeof SgsCustomerReceiptsRoute
-  '/sgs/requests': typeof SgsCustomerRequestsRoute
-  '/sgs/onboarding': typeof SgsWebOnboardingRoute
-  '/sgs/signin': typeof SgsWebSigninRoute
-  '/sgs/signup': typeof SgsWebSignupRoute
-  '/sgs-admin': typeof SgsAdminAdminIndexRoute
-  '/sgs-admin/invoices/$paymentId/print': typeof SgsAdminInvoicesPaymentIdPrintRoute
-  '/sgs-admin/requests/$requestId/print': typeof SgsAdminRequestsRequestIdPrintRoute
-  '/sgs/api/auth/$': typeof SgsApiAuthSplatRoute
-  '/sgs/invoices/$paymentId/print': typeof SgsInvoicesPaymentIdPrintRoute
-  '/sgs/requests/$requestId/print': typeof SgsRequestsRequestIdPrintRoute
+  '/': typeof WebIndexRoute
+  '/dashboard': typeof CustomerDashboardRoute
+  '/receipts': typeof CustomerReceiptsRoute
+  '/requests': typeof CustomerRequestsRoute
+  '/onboarding': typeof WebOnboardingRoute
+  '/signin': typeof WebSigninRoute
+  '/signup': typeof WebSignupRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/api/$': typeof ApiSplatRoute
+  '/admin/clients': typeof AdminAdminClientsRoute
+  '/admin/items': typeof AdminAdminItemsRoute
+  '/admin/payments': typeof AdminAdminPaymentsRoute
+  '/admin/requests': typeof AdminAdminRequestsRoute
+  '/admin/users': typeof AdminAdminUsersRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/invoices/$paymentId/print': typeof InvoicesPaymentIdPrintRoute
+  '/requests/$requestId/print': typeof RequestsRequestIdPrintRoute
+  '/admin': typeof AdminAdminIndexRoute
+  '/admin/invoices/$paymentId/print': typeof AdminInvoicesPaymentIdPrintRoute
+  '/admin/requests/$requestId/print': typeof AdminRequestsRequestIdPrintRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/sgs-admin/_admin': typeof SgsAdminAdminRouteRouteWithChildren
-  '/sgs/_customer': typeof SgsCustomerRouteRouteWithChildren
-  '/sgs-admin/login': typeof SgsAdminLoginRoute
-  '/sgs-api/$': typeof SgsApiSplatRoute
-  '/sgs-admin/_admin/clients': typeof SgsAdminAdminClientsRoute
-  '/sgs-admin/_admin/items': typeof SgsAdminAdminItemsRoute
-  '/sgs-admin/_admin/payments': typeof SgsAdminAdminPaymentsRoute
-  '/sgs-admin/_admin/requests': typeof SgsAdminAdminRequestsRoute
-  '/sgs-admin/_admin/users': typeof SgsAdminAdminUsersRoute
-  '/sgs/_customer/dashboard': typeof SgsCustomerDashboardRoute
-  '/sgs/_customer/receipts': typeof SgsCustomerReceiptsRoute
-  '/sgs/_customer/requests': typeof SgsCustomerRequestsRoute
-  '/sgs/_web/onboarding': typeof SgsWebOnboardingRoute
-  '/sgs/_web/signin': typeof SgsWebSigninRoute
-  '/sgs/_web/signup': typeof SgsWebSignupRoute
-  '/sgs-admin/_admin/': typeof SgsAdminAdminIndexRoute
-  '/sgs/_web/': typeof SgsWebIndexRoute
-  '/sgs-admin/invoices/$paymentId/print': typeof SgsAdminInvoicesPaymentIdPrintRoute
-  '/sgs-admin/requests/$requestId/print': typeof SgsAdminRequestsRequestIdPrintRoute
-  '/sgs/api/auth/$': typeof SgsApiAuthSplatRoute
-  '/sgs/invoices/$paymentId/print': typeof SgsInvoicesPaymentIdPrintRoute
-  '/sgs/requests/$requestId/print': typeof SgsRequestsRequestIdPrintRoute
+  '/_customer': typeof CustomerRouteRouteWithChildren
+  '/admin/_admin': typeof AdminAdminRouteRouteWithChildren
+  '/_customer/dashboard': typeof CustomerDashboardRoute
+  '/_customer/receipts': typeof CustomerReceiptsRoute
+  '/_customer/requests': typeof CustomerRequestsRoute
+  '/_web/onboarding': typeof WebOnboardingRoute
+  '/_web/signin': typeof WebSigninRoute
+  '/_web/signup': typeof WebSignupRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/api/$': typeof ApiSplatRoute
+  '/_web/': typeof WebIndexRoute
+  '/admin/_admin/clients': typeof AdminAdminClientsRoute
+  '/admin/_admin/items': typeof AdminAdminItemsRoute
+  '/admin/_admin/payments': typeof AdminAdminPaymentsRoute
+  '/admin/_admin/requests': typeof AdminAdminRequestsRoute
+  '/admin/_admin/users': typeof AdminAdminUsersRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
+  '/invoices/$paymentId/print': typeof InvoicesPaymentIdPrintRoute
+  '/requests/$requestId/print': typeof RequestsRequestIdPrintRoute
+  '/admin/_admin/': typeof AdminAdminIndexRoute
+  '/admin/invoices/$paymentId/print': typeof AdminInvoicesPaymentIdPrintRoute
+  '/admin/requests/$requestId/print': typeof AdminRequestsRequestIdPrintRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/sgs-admin'
-    | '/sgs'
-    | '/sgs-admin/login'
-    | '/sgs-api/$'
-    | '/sgs-admin/clients'
-    | '/sgs-admin/items'
-    | '/sgs-admin/payments'
-    | '/sgs-admin/requests'
-    | '/sgs-admin/users'
-    | '/sgs/dashboard'
-    | '/sgs/receipts'
-    | '/sgs/requests'
-    | '/sgs/onboarding'
-    | '/sgs/signin'
-    | '/sgs/signup'
-    | '/sgs-admin/'
-    | '/sgs/'
-    | '/sgs-admin/invoices/$paymentId/print'
-    | '/sgs-admin/requests/$requestId/print'
-    | '/sgs/api/auth/$'
-    | '/sgs/invoices/$paymentId/print'
-    | '/sgs/requests/$requestId/print'
+    | '/'
+    | '/admin'
+    | '/dashboard'
+    | '/receipts'
+    | '/requests'
+    | '/onboarding'
+    | '/signin'
+    | '/signup'
+    | '/admin/login'
+    | '/api/$'
+    | '/admin/clients'
+    | '/admin/items'
+    | '/admin/payments'
+    | '/admin/requests'
+    | '/admin/users'
+    | '/api/auth/$'
+    | '/invoices/$paymentId/print'
+    | '/requests/$requestId/print'
+    | '/admin/'
+    | '/admin/invoices/$paymentId/print'
+    | '/admin/requests/$requestId/print'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/sgs'
-    | '/sgs-admin/login'
-    | '/sgs-api/$'
-    | '/sgs-admin/clients'
-    | '/sgs-admin/items'
-    | '/sgs-admin/payments'
-    | '/sgs-admin/requests'
-    | '/sgs-admin/users'
-    | '/sgs/dashboard'
-    | '/sgs/receipts'
-    | '/sgs/requests'
-    | '/sgs/onboarding'
-    | '/sgs/signin'
-    | '/sgs/signup'
-    | '/sgs-admin'
-    | '/sgs-admin/invoices/$paymentId/print'
-    | '/sgs-admin/requests/$requestId/print'
-    | '/sgs/api/auth/$'
-    | '/sgs/invoices/$paymentId/print'
-    | '/sgs/requests/$requestId/print'
+    | '/'
+    | '/dashboard'
+    | '/receipts'
+    | '/requests'
+    | '/onboarding'
+    | '/signin'
+    | '/signup'
+    | '/admin/login'
+    | '/api/$'
+    | '/admin/clients'
+    | '/admin/items'
+    | '/admin/payments'
+    | '/admin/requests'
+    | '/admin/users'
+    | '/api/auth/$'
+    | '/invoices/$paymentId/print'
+    | '/requests/$requestId/print'
+    | '/admin'
+    | '/admin/invoices/$paymentId/print'
+    | '/admin/requests/$requestId/print'
   id:
     | '__root__'
-    | '/sgs-admin/_admin'
-    | '/sgs/_customer'
-    | '/sgs-admin/login'
-    | '/sgs-api/$'
-    | '/sgs-admin/_admin/clients'
-    | '/sgs-admin/_admin/items'
-    | '/sgs-admin/_admin/payments'
-    | '/sgs-admin/_admin/requests'
-    | '/sgs-admin/_admin/users'
-    | '/sgs/_customer/dashboard'
-    | '/sgs/_customer/receipts'
-    | '/sgs/_customer/requests'
-    | '/sgs/_web/onboarding'
-    | '/sgs/_web/signin'
-    | '/sgs/_web/signup'
-    | '/sgs-admin/_admin/'
-    | '/sgs/_web/'
-    | '/sgs-admin/invoices/$paymentId/print'
-    | '/sgs-admin/requests/$requestId/print'
-    | '/sgs/api/auth/$'
-    | '/sgs/invoices/$paymentId/print'
-    | '/sgs/requests/$requestId/print'
+    | '/_customer'
+    | '/admin/_admin'
+    | '/_customer/dashboard'
+    | '/_customer/receipts'
+    | '/_customer/requests'
+    | '/_web/onboarding'
+    | '/_web/signin'
+    | '/_web/signup'
+    | '/admin/login'
+    | '/api/$'
+    | '/_web/'
+    | '/admin/_admin/clients'
+    | '/admin/_admin/items'
+    | '/admin/_admin/payments'
+    | '/admin/_admin/requests'
+    | '/admin/_admin/users'
+    | '/api/auth/$'
+    | '/invoices/$paymentId/print'
+    | '/requests/$requestId/print'
+    | '/admin/_admin/'
+    | '/admin/invoices/$paymentId/print'
+    | '/admin/requests/$requestId/print'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  SgsAdminAdminRouteRoute: typeof SgsAdminAdminRouteRouteWithChildren
-  SgsCustomerRouteRoute: typeof SgsCustomerRouteRouteWithChildren
-  SgsAdminLoginRoute: typeof SgsAdminLoginRoute
-  SgsApiSplatRoute: typeof SgsApiSplatRoute
-  SgsWebOnboardingRoute: typeof SgsWebOnboardingRoute
-  SgsWebSigninRoute: typeof SgsWebSigninRoute
-  SgsWebSignupRoute: typeof SgsWebSignupRoute
-  SgsWebIndexRoute: typeof SgsWebIndexRoute
-  SgsAdminInvoicesPaymentIdPrintRoute: typeof SgsAdminInvoicesPaymentIdPrintRoute
-  SgsAdminRequestsRequestIdPrintRoute: typeof SgsAdminRequestsRequestIdPrintRoute
-  SgsApiAuthSplatRoute: typeof SgsApiAuthSplatRoute
-  SgsInvoicesPaymentIdPrintRoute: typeof SgsInvoicesPaymentIdPrintRoute
-  SgsRequestsRequestIdPrintRoute: typeof SgsRequestsRequestIdPrintRoute
+  CustomerRouteRoute: typeof CustomerRouteRouteWithChildren
+  AdminAdminRouteRoute: typeof AdminAdminRouteRouteWithChildren
+  WebOnboardingRoute: typeof WebOnboardingRoute
+  WebSigninRoute: typeof WebSigninRoute
+  WebSignupRoute: typeof WebSignupRoute
+  AdminLoginRoute: typeof AdminLoginRoute
+  ApiSplatRoute: typeof ApiSplatRoute
+  WebIndexRoute: typeof WebIndexRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  InvoicesPaymentIdPrintRoute: typeof InvoicesPaymentIdPrintRoute
+  RequestsRequestIdPrintRoute: typeof RequestsRequestIdPrintRoute
+  AdminInvoicesPaymentIdPrintRoute: typeof AdminInvoicesPaymentIdPrintRoute
+  AdminRequestsRequestIdPrintRoute: typeof AdminRequestsRequestIdPrintRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sgs-admin/_admin': {
-      id: '/sgs-admin/_admin'
-      path: '/sgs-admin'
-      fullPath: '/sgs-admin'
-      preLoaderRoute: typeof SgsAdminAdminRouteRouteImport
+    '/_customer': {
+      id: '/_customer'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof CustomerRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sgs-admin/login': {
-      id: '/sgs-admin/login'
-      path: '/sgs-admin/login'
-      fullPath: '/sgs-admin/login'
-      preLoaderRoute: typeof SgsAdminLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sgs-api/$': {
-      id: '/sgs-api/$'
-      path: '/sgs-api/$'
-      fullPath: '/sgs-api/$'
-      preLoaderRoute: typeof SgsApiSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sgs/_customer': {
-      id: '/sgs/_customer'
-      path: '/sgs'
-      fullPath: '/sgs'
-      preLoaderRoute: typeof SgsCustomerRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sgs-admin/_admin/': {
-      id: '/sgs-admin/_admin/'
-      path: '/'
-      fullPath: '/sgs-admin/'
-      preLoaderRoute: typeof SgsAdminAdminIndexRouteImport
-      parentRoute: typeof SgsAdminAdminRouteRoute
-    }
-    '/sgs-admin/_admin/clients': {
-      id: '/sgs-admin/_admin/clients'
-      path: '/clients'
-      fullPath: '/sgs-admin/clients'
-      preLoaderRoute: typeof SgsAdminAdminClientsRouteImport
-      parentRoute: typeof SgsAdminAdminRouteRoute
-    }
-    '/sgs-admin/_admin/items': {
-      id: '/sgs-admin/_admin/items'
-      path: '/items'
-      fullPath: '/sgs-admin/items'
-      preLoaderRoute: typeof SgsAdminAdminItemsRouteImport
-      parentRoute: typeof SgsAdminAdminRouteRoute
-    }
-    '/sgs-admin/_admin/payments': {
-      id: '/sgs-admin/_admin/payments'
-      path: '/payments'
-      fullPath: '/sgs-admin/payments'
-      preLoaderRoute: typeof SgsAdminAdminPaymentsRouteImport
-      parentRoute: typeof SgsAdminAdminRouteRoute
-    }
-    '/sgs-admin/_admin/requests': {
-      id: '/sgs-admin/_admin/requests'
-      path: '/requests'
-      fullPath: '/sgs-admin/requests'
-      preLoaderRoute: typeof SgsAdminAdminRequestsRouteImport
-      parentRoute: typeof SgsAdminAdminRouteRoute
-    }
-    '/sgs-admin/_admin/users': {
-      id: '/sgs-admin/_admin/users'
-      path: '/users'
-      fullPath: '/sgs-admin/users'
-      preLoaderRoute: typeof SgsAdminAdminUsersRouteImport
-      parentRoute: typeof SgsAdminAdminRouteRoute
-    }
-    '/sgs/_customer/dashboard': {
-      id: '/sgs/_customer/dashboard'
+    '/_customer/dashboard': {
+      id: '/_customer/dashboard'
       path: '/dashboard'
-      fullPath: '/sgs/dashboard'
-      preLoaderRoute: typeof SgsCustomerDashboardRouteImport
-      parentRoute: typeof SgsCustomerRouteRoute
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof CustomerDashboardRouteImport
+      parentRoute: typeof CustomerRouteRoute
     }
-    '/sgs/_customer/receipts': {
-      id: '/sgs/_customer/receipts'
+    '/_customer/receipts': {
+      id: '/_customer/receipts'
       path: '/receipts'
-      fullPath: '/sgs/receipts'
-      preLoaderRoute: typeof SgsCustomerReceiptsRouteImport
-      parentRoute: typeof SgsCustomerRouteRoute
+      fullPath: '/receipts'
+      preLoaderRoute: typeof CustomerReceiptsRouteImport
+      parentRoute: typeof CustomerRouteRoute
     }
-    '/sgs/_customer/requests': {
-      id: '/sgs/_customer/requests'
+    '/_customer/requests': {
+      id: '/_customer/requests'
       path: '/requests'
-      fullPath: '/sgs/requests'
-      preLoaderRoute: typeof SgsCustomerRequestsRouteImport
-      parentRoute: typeof SgsCustomerRouteRoute
+      fullPath: '/requests'
+      preLoaderRoute: typeof CustomerRequestsRouteImport
+      parentRoute: typeof CustomerRouteRoute
     }
-    '/sgs/_web/': {
-      id: '/sgs/_web/'
-      path: '/sgs'
-      fullPath: '/sgs/'
-      preLoaderRoute: typeof SgsWebIndexRouteImport
+    '/_web/': {
+      id: '/_web/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof WebIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sgs/_web/onboarding': {
-      id: '/sgs/_web/onboarding'
-      path: '/sgs/onboarding'
-      fullPath: '/sgs/onboarding'
-      preLoaderRoute: typeof SgsWebOnboardingRouteImport
+    '/_web/onboarding': {
+      id: '/_web/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof WebOnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sgs/_web/signin': {
-      id: '/sgs/_web/signin'
-      path: '/sgs/signin'
-      fullPath: '/sgs/signin'
-      preLoaderRoute: typeof SgsWebSigninRouteImport
+    '/_web/signin': {
+      id: '/_web/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof WebSigninRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sgs/_web/signup': {
-      id: '/sgs/_web/signup'
-      path: '/sgs/signup'
-      fullPath: '/sgs/signup'
-      preLoaderRoute: typeof SgsWebSignupRouteImport
+    '/_web/signup': {
+      id: '/_web/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof WebSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sgs-admin/invoices/$paymentId/print': {
-      id: '/sgs-admin/invoices/$paymentId/print'
-      path: '/sgs-admin/invoices/$paymentId/print'
-      fullPath: '/sgs-admin/invoices/$paymentId/print'
-      preLoaderRoute: typeof SgsAdminInvoicesPaymentIdPrintRouteImport
+    '/admin/_admin': {
+      id: '/admin/_admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminAdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sgs-admin/requests/$requestId/print': {
-      id: '/sgs-admin/requests/$requestId/print'
-      path: '/sgs-admin/requests/$requestId/print'
-      fullPath: '/sgs-admin/requests/$requestId/print'
-      preLoaderRoute: typeof SgsAdminRequestsRequestIdPrintRouteImport
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sgs/api/auth/$': {
-      id: '/sgs/api/auth/$'
-      path: '/sgs/api/auth/$'
-      fullPath: '/sgs/api/auth/$'
-      preLoaderRoute: typeof SgsApiAuthSplatRouteImport
+    '/api/$': {
+      id: '/api/$'
+      path: '/api/$'
+      fullPath: '/api/$'
+      preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sgs/invoices/$paymentId/print': {
-      id: '/sgs/invoices/$paymentId/print'
-      path: '/sgs/invoices/$paymentId/print'
-      fullPath: '/sgs/invoices/$paymentId/print'
-      preLoaderRoute: typeof SgsInvoicesPaymentIdPrintRouteImport
+    '/admin/_admin/': {
+      id: '/admin/_admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminAdminIndexRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
+    '/admin/_admin/clients': {
+      id: '/admin/_admin/clients'
+      path: '/clients'
+      fullPath: '/admin/clients'
+      preLoaderRoute: typeof AdminAdminClientsRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
+    '/admin/_admin/items': {
+      id: '/admin/_admin/items'
+      path: '/items'
+      fullPath: '/admin/items'
+      preLoaderRoute: typeof AdminAdminItemsRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
+    '/admin/_admin/payments': {
+      id: '/admin/_admin/payments'
+      path: '/payments'
+      fullPath: '/admin/payments'
+      preLoaderRoute: typeof AdminAdminPaymentsRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
+    '/admin/_admin/requests': {
+      id: '/admin/_admin/requests'
+      path: '/requests'
+      fullPath: '/admin/requests'
+      preLoaderRoute: typeof AdminAdminRequestsRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
+    '/admin/_admin/users': {
+      id: '/admin/_admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminAdminUsersRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sgs/requests/$requestId/print': {
-      id: '/sgs/requests/$requestId/print'
-      path: '/sgs/requests/$requestId/print'
-      fullPath: '/sgs/requests/$requestId/print'
-      preLoaderRoute: typeof SgsRequestsRequestIdPrintRouteImport
+    '/invoices/$paymentId/print': {
+      id: '/invoices/$paymentId/print'
+      path: '/invoices/$paymentId/print'
+      fullPath: '/invoices/$paymentId/print'
+      preLoaderRoute: typeof InvoicesPaymentIdPrintRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/requests/$requestId/print': {
+      id: '/requests/$requestId/print'
+      path: '/requests/$requestId/print'
+      fullPath: '/requests/$requestId/print'
+      preLoaderRoute: typeof RequestsRequestIdPrintRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/invoices/$paymentId/print': {
+      id: '/admin/invoices/$paymentId/print'
+      path: '/admin/invoices/$paymentId/print'
+      fullPath: '/admin/invoices/$paymentId/print'
+      preLoaderRoute: typeof AdminInvoicesPaymentIdPrintRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/requests/$requestId/print': {
+      id: '/admin/requests/$requestId/print'
+      path: '/admin/requests/$requestId/print'
+      fullPath: '/admin/requests/$requestId/print'
+      preLoaderRoute: typeof AdminRequestsRequestIdPrintRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface SgsAdminAdminRouteRouteChildren {
-  SgsAdminAdminClientsRoute: typeof SgsAdminAdminClientsRoute
-  SgsAdminAdminItemsRoute: typeof SgsAdminAdminItemsRoute
-  SgsAdminAdminPaymentsRoute: typeof SgsAdminAdminPaymentsRoute
-  SgsAdminAdminRequestsRoute: typeof SgsAdminAdminRequestsRoute
-  SgsAdminAdminUsersRoute: typeof SgsAdminAdminUsersRoute
-  SgsAdminAdminIndexRoute: typeof SgsAdminAdminIndexRoute
+interface CustomerRouteRouteChildren {
+  CustomerDashboardRoute: typeof CustomerDashboardRoute
+  CustomerReceiptsRoute: typeof CustomerReceiptsRoute
+  CustomerRequestsRoute: typeof CustomerRequestsRoute
 }
 
-const SgsAdminAdminRouteRouteChildren: SgsAdminAdminRouteRouteChildren = {
-  SgsAdminAdminClientsRoute: SgsAdminAdminClientsRoute,
-  SgsAdminAdminItemsRoute: SgsAdminAdminItemsRoute,
-  SgsAdminAdminPaymentsRoute: SgsAdminAdminPaymentsRoute,
-  SgsAdminAdminRequestsRoute: SgsAdminAdminRequestsRoute,
-  SgsAdminAdminUsersRoute: SgsAdminAdminUsersRoute,
-  SgsAdminAdminIndexRoute: SgsAdminAdminIndexRoute,
+const CustomerRouteRouteChildren: CustomerRouteRouteChildren = {
+  CustomerDashboardRoute: CustomerDashboardRoute,
+  CustomerReceiptsRoute: CustomerReceiptsRoute,
+  CustomerRequestsRoute: CustomerRequestsRoute,
 }
 
-const SgsAdminAdminRouteRouteWithChildren =
-  SgsAdminAdminRouteRoute._addFileChildren(SgsAdminAdminRouteRouteChildren)
+const CustomerRouteRouteWithChildren = CustomerRouteRoute._addFileChildren(
+  CustomerRouteRouteChildren,
+)
 
-interface SgsCustomerRouteRouteChildren {
-  SgsCustomerDashboardRoute: typeof SgsCustomerDashboardRoute
-  SgsCustomerReceiptsRoute: typeof SgsCustomerReceiptsRoute
-  SgsCustomerRequestsRoute: typeof SgsCustomerRequestsRoute
+interface AdminAdminRouteRouteChildren {
+  AdminAdminClientsRoute: typeof AdminAdminClientsRoute
+  AdminAdminItemsRoute: typeof AdminAdminItemsRoute
+  AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
+  AdminAdminRequestsRoute: typeof AdminAdminRequestsRoute
+  AdminAdminUsersRoute: typeof AdminAdminUsersRoute
+  AdminAdminIndexRoute: typeof AdminAdminIndexRoute
 }
 
-const SgsCustomerRouteRouteChildren: SgsCustomerRouteRouteChildren = {
-  SgsCustomerDashboardRoute: SgsCustomerDashboardRoute,
-  SgsCustomerReceiptsRoute: SgsCustomerReceiptsRoute,
-  SgsCustomerRequestsRoute: SgsCustomerRequestsRoute,
+const AdminAdminRouteRouteChildren: AdminAdminRouteRouteChildren = {
+  AdminAdminClientsRoute: AdminAdminClientsRoute,
+  AdminAdminItemsRoute: AdminAdminItemsRoute,
+  AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
+  AdminAdminRequestsRoute: AdminAdminRequestsRoute,
+  AdminAdminUsersRoute: AdminAdminUsersRoute,
+  AdminAdminIndexRoute: AdminAdminIndexRoute,
 }
 
-const SgsCustomerRouteRouteWithChildren =
-  SgsCustomerRouteRoute._addFileChildren(SgsCustomerRouteRouteChildren)
+const AdminAdminRouteRouteWithChildren = AdminAdminRouteRoute._addFileChildren(
+  AdminAdminRouteRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
-  SgsAdminAdminRouteRoute: SgsAdminAdminRouteRouteWithChildren,
-  SgsCustomerRouteRoute: SgsCustomerRouteRouteWithChildren,
-  SgsAdminLoginRoute: SgsAdminLoginRoute,
-  SgsApiSplatRoute: SgsApiSplatRoute,
-  SgsWebOnboardingRoute: SgsWebOnboardingRoute,
-  SgsWebSigninRoute: SgsWebSigninRoute,
-  SgsWebSignupRoute: SgsWebSignupRoute,
-  SgsWebIndexRoute: SgsWebIndexRoute,
-  SgsAdminInvoicesPaymentIdPrintRoute: SgsAdminInvoicesPaymentIdPrintRoute,
-  SgsAdminRequestsRequestIdPrintRoute: SgsAdminRequestsRequestIdPrintRoute,
-  SgsApiAuthSplatRoute: SgsApiAuthSplatRoute,
-  SgsInvoicesPaymentIdPrintRoute: SgsInvoicesPaymentIdPrintRoute,
-  SgsRequestsRequestIdPrintRoute: SgsRequestsRequestIdPrintRoute,
+  CustomerRouteRoute: CustomerRouteRouteWithChildren,
+  AdminAdminRouteRoute: AdminAdminRouteRouteWithChildren,
+  WebOnboardingRoute: WebOnboardingRoute,
+  WebSigninRoute: WebSigninRoute,
+  WebSignupRoute: WebSignupRoute,
+  AdminLoginRoute: AdminLoginRoute,
+  ApiSplatRoute: ApiSplatRoute,
+  WebIndexRoute: WebIndexRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
+  InvoicesPaymentIdPrintRoute: InvoicesPaymentIdPrintRoute,
+  RequestsRequestIdPrintRoute: RequestsRequestIdPrintRoute,
+  AdminInvoicesPaymentIdPrintRoute: AdminInvoicesPaymentIdPrintRoute,
+  AdminRequestsRequestIdPrintRoute: AdminRequestsRequestIdPrintRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

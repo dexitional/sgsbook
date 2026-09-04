@@ -91,6 +91,8 @@ export async function createUser(input: CreateUserInput) {
       tag: input.tag,
       username: input.username,
       name: input.name,
+      email: input.email,
+      phone: input.phone,
       password: hashed,
       userRole: {
         create: roles.map((role) => ({ appRoleId: role.id, roleMeta: `${APP_TAG}::${role.title.toLowerCase()}` })),
@@ -106,6 +108,8 @@ export async function updateUser(id: number, input: UpdateUserInput) {
   const data: Prisma.userUpdateInput = {};
   if (input.username !== undefined) data.username = input.username;
   if (input.name !== undefined) data.name = input.name;
+  if (input.email !== undefined) data.email = input.email;
+  if (input.phone !== undefined) data.phone = input.phone;
   if (input.status !== undefined) data.status = input.status;
   if (input.locked !== undefined) data.locked = input.locked;
   if (input.password) data.password = await bcrypt.hash(input.password, 10);

@@ -6,12 +6,12 @@ import { useThemeStore } from "@sgs/ui";
 import { useLogout } from "#/lib/queries/session";
 
 const pages = [
-  { to: "/sgs-admin", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/sgs-admin/clients", label: "Clients", icon: UserSquare2 },
-  { to: "/sgs-admin/items", label: "Facilities", icon: Package },
-  { to: "/sgs-admin/requests", label: "Bookings", icon: Receipt },
-  { to: "/sgs-admin/payments", label: "Payments", icon: Wallet },
-  { to: "/sgs-admin/users", label: "Users", icon: Users },
+  { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/admin/clients", label: "Clients", icon: UserSquare2 },
+  { to: "/admin/items", label: "Facilities", icon: Package },
+  { to: "/admin/requests", label: "Bookings", icon: Receipt },
+  { to: "/admin/payments", label: "Payments", icon: Wallet },
+  { to: "/admin/users", label: "Users", icon: Users },
 ] as const;
 
 export function CommandPalette() {

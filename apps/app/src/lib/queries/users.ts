@@ -27,6 +27,8 @@ export interface CreateUserInput {
   tag: string;
   username: string;
   name?: string;
+  email?: string;
+  phone?: string;
   password: string;
   appRoleIds: number[];
 }
@@ -43,6 +45,8 @@ export interface UpdateUserInput {
   id: number;
   username?: string;
   name?: string;
+  email?: string;
+  phone?: string;
   password?: string;
   status?: boolean;
   locked?: boolean;

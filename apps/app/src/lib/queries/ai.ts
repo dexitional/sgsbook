@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../api-client.js";
 
-const API_URL = "/sgs-api";
+const API_URL = "/api";
 
 export interface MetricsSnapshot {
   generatedAt: string;

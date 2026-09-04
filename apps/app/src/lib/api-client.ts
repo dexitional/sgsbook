@@ -1,4 +1,4 @@
-const API_URL = "/sgs-api";
+const API_URL = "/api";
 
 export class ApiError extends Error {
   constructor(

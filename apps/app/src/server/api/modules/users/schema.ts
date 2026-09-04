@@ -4,6 +4,8 @@ export const createUserSchema = z.object({
   tag: z.string().min(1),
   username: z.string().min(1),
   name: z.string().min(1).optional(),
+  email: z.string().email().optional(),
+  phone: z.string().min(1).optional(),
   password: z.string().min(8),
   appRoleIds: z.array(z.coerce.number()).min(1, "Select at least one role"),
 });
@@ -11,6 +13,8 @@ export const createUserSchema = z.object({
 export const updateUserSchema = z.object({
   username: z.string().min(1).optional(),
   name: z.string().min(1).optional(),
+  email: z.string().email().optional(),
+  phone: z.string().min(1).optional(),
   password: z.string().min(8).optional(),
   status: z.boolean().optional(),
   locked: z.boolean().optional(),

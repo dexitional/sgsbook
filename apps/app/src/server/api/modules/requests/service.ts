@@ -1,8 +1,23 @@
 import { prisma, Prisma } from "@sgs/db";
 import type { z } from "zod";
-import { emailService } from "../../lib/email.js";
+import { emailService, staffEmailService } from "../../lib/email.js";
+import { smsService } from "../../lib/sms.js";
+import { buildInvoiceEmail, getLogoAttachment } from "../../lib/invoice-email.js";
 import { computeRequestInvoice, type PackageInput } from "../../lib/pricing.js";
 import type { createRequestSchema, listRequestsQuerySchema, updateStatusSchema } from "./schema.js";
+
+// Staff who should be alerted to prepare the facility once a booking is
+// approved — every active user with a role on this app, regardless of which
+// role (admin, facilitator, decorator all get notified).
+async function getActiveStaffContacts() {
+  const app = await prisma.app.findUnique({ where: { tag: "ubs" } });
+  if (!app) return [];
+  const users = await prisma.user.findMany({
+    where: { status: true, userRole: { some: { status: true, appRole: { appId: app.id } } } },
+    select: { name: true, username: true, email: true, phone: true },
+  });
+  return users;
+}
 
 type CreateRequestInput = z.infer<typeof createRequestSchema>;
 type UpdateStatusInput = z.infer<typeof updateStatusSchema>;
@@ -101,16 +116,62 @@ export async function updateStatus(id: string, input: UpdateStatusInput) {
     include: detailInclude,
   });
 
-  if (input.status === "APPROVED" && request.client?.email) {
-    // Best-effort — a booking's approval must not fail because email delivery
-    // hiccups. Failures are logged, not thrown.
-    void emailService
-      .send({
-        to: request.client.email,
-        subject: `Booking approved: ${request.title}`,
-        html: `<p>Hi ${request.client.name},</p><p>Your booking request "<strong>${request.title}</strong>" has been approved.</p>`,
+  if (input.status === "APPROVED") {
+    // Best-effort throughout — a booking's approval must not fail because
+    // notification delivery hiccups. Failures are logged, not thrown.
+    if (request.client?.email) {
+      const invoiceEmail = buildInvoiceEmail({
+        requestId: request.id,
+        title: request.title,
+        clientName: request.client.organisation || request.client.name,
+        chargeAmount: request.chargeAmount,
+        packages: request.packages,
+      });
+      void emailService
+        .send({
+          to: request.client.email,
+          subject: invoiceEmail.subject,
+          html: invoiceEmail.html,
+          attachments: [getLogoAttachment()],
+        })
+        .catch((err) => console.error("Failed to send approval invoice email:", err));
+    }
+
+    if (request.client?.phone) {
+      void smsService
+        .send([request.client.phone], `Hi ${request.client.name}, your booking "${request.title}" has been approved.`)
+        .catch((err) => console.error("Failed to send approval SMS to client:", err));
+    }
+
+    const facilityNames = Array.from(new Set(request.packages.map((p) => p.bookItem.title))).join(", ");
+    const firstStart = request.packages[0]?.bookStart;
+
+    void getActiveStaffContacts()
+      .then((staff) => {
+        const emails = staff.map((s) => s.email).filter((e): e is string => !!e);
+        const phones = staff.map((s) => s.phone).filter((p): p is string => !!p);
+
+        if (emails.length > 0) {
+          void staffEmailService
+            .send({
+              to: emails[0],
+              bcc: emails.slice(1),
+              subject: `Prepare facility: ${facilityNames || request.title}`,
+              html: `<p>Booking request "<strong>${request.title}</strong>" has been approved.</p><p>Facility: ${facilityNames}${firstStart ? `<br>When: ${new Date(firstStart).toLocaleString()}` : ""}</p><p>Please prepare the place for the customer.</p>`,
+            })
+            .catch((err) => console.error("Failed to send staff prep email:", err));
+        }
+
+        if (phones.length > 0) {
+          void smsService
+            .send(
+              phones,
+              `Booking approved: ${facilityNames || request.title}${firstStart ? ` on ${new Date(firstStart).toLocaleString()}` : ""}. Please prepare the place for the customer.`,
+            )
+            .catch((err) => console.error("Failed to send staff prep SMS:", err));
+        }
       })
-      .catch((err) => console.error("Failed to send approval email:", err));
+      .catch((err) => console.error("Failed to load staff contacts for prep notification:", err));
   }
 
   return request;

@@ -61,7 +61,15 @@ function CustomerLayout() {
     }
   }, [customer.data, navigate]);
 
-  if (customer.isLoading || !customer.data?.authenticated || !customer.data.client) {
+  // Mirrors the useEffect's redirect conditions exactly — otherwise this
+  // layout flashes on screen for one frame before the effect navigates a
+  // not-yet-onboarded customer away to /onboarding.
+  if (
+    customer.isLoading ||
+    !customer.data?.authenticated ||
+    !customer.data.client ||
+    customer.data.client.contacts.length === 0
+  ) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
         Loading…

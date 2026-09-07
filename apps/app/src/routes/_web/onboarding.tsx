@@ -57,7 +57,12 @@ function OnboardingPage() {
     navigate({ to: "/dashboard" });
   });
 
-  if (customer.isLoading || !customer.data?.authenticated) {
+  const alreadyOnboarded = Boolean(customer.data?.client && customer.data.client.contacts.length > 0);
+
+  // Mirrors the useEffect's redirect conditions exactly — otherwise this
+  // form flashes on screen for one frame before the effect navigates an
+  // already-onboarded customer away to /dashboard.
+  if (customer.isLoading || !customer.data?.authenticated || alreadyOnboarded) {
     return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
   }
 

@@ -1,62 +1,73 @@
-// Thin wrapper around Unosend's REST API (https://docs.unosend.co) — no
-// official Node SDK exists, so this is a plain fetch call behind a small
-// interface, kept swappable if that changes.
+// Gmail SMTP via nodemailer, used for every outbound email this app sends —
+// both customer-facing (booking invoice on approval, receipt on payment)
+// and staff prep-notification emails. Previously routed customer emails
+// through Unosend, but its sender domain was never verified, so it could
+// never actually deliver — dropped in favor of the already-working Gmail
+// account.
+import nodemailer from "nodemailer";
+
+export interface EmailAttachment {
+  filename: string;
+  content: Buffer;
+  cid?: string;
+}
 
 export interface SendEmailInput {
   to: string;
+  bcc?: string[];
   subject: string;
   html: string;
   text?: string;
+  attachments?: EmailAttachment[];
 }
 
 export interface EmailService {
   send(input: SendEmailInput): Promise<void>;
 }
 
-class UnosendEmailService implements EmailService {
-  // Per docs.unosend.co: POST /emails (no /v1 prefix), `from` is a plain
-  // "Name <email>" string, body fields are `to`/`html`/`text` directly —
-  // not the {address,name} / htmlbody shape this was first written against.
-  private readonly endpoint = "https://api.unosend.co/emails";
+// GMAIL_APP_PASSWORD must be a Google App Password (Google Account ->
+// Security -> 2-Step Verification -> App passwords) — Gmail SMTP rejects a
+// normal account login password. The From address must match the
+// authenticated account; anything else gets silently rewritten or rejected.
+class GmailEmailService implements EmailService {
+  private transporter: import("nodemailer").Transporter;
 
   constructor(
-    private readonly apiKey: string,
     private readonly fromAddress: string,
     private readonly fromName: string,
-  ) {}
+    password: string,
+  ) {
+    this.transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user: fromAddress, pass: password },
+    });
+  }
 
   async send(input: SendEmailInput): Promise<void> {
-    const res = await fetch(this.endpoint, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: `${this.fromName} <${this.fromAddress}>`,
-        to: [input.to],
-        subject: input.subject,
-        html: input.html,
-        text: input.text,
-      }),
+    await this.transporter.sendMail({
+      from: `${this.fromName} <${this.fromAddress}>`,
+      to: input.to,
+      bcc: input.bcc,
+      subject: input.subject,
+      html: input.html,
+      text: input.text,
+      attachments: input.attachments,
     });
-
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      throw new Error(`Unosend send failed (${res.status}): ${body}`);
-    }
   }
 }
 
 class NoopEmailService implements EmailService {
   async send(input: SendEmailInput): Promise<void> {
-    console.warn(`[email:noop] UNOSEND_API_KEY not set — skipping email to ${input.to}: "${input.subject}"`);
+    console.warn(`[email:noop] GMAIL_USER/GMAIL_APP_PASSWORD not set — skipping email to ${input.to}: "${input.subject}"`);
   }
 }
 
-const apiKey = process.env.UNOSEND_API_KEY;
-const fromAddress = process.env.UNOSEND_FROM_ADDRESS;
-const fromName = process.env.UNOSEND_FROM_NAME ?? "SGS Booking Platform";
+const gmailUser = process.env.GMAIL_USER;
+const gmailPassword = process.env.GMAIL_APP_PASSWORD;
+const gmailFromName = process.env.GMAIL_FROM_NAME ?? "SGS Booking Platform";
 
-export const emailService: EmailService =
-  apiKey && fromAddress ? new UnosendEmailService(apiKey, fromAddress, fromName) : new NoopEmailService();
+const gmailEmailService: EmailService =
+  gmailUser && gmailPassword ? new GmailEmailService(gmailUser, gmailFromName, gmailPassword) : new NoopEmailService();
+
+export const emailService: EmailService = gmailEmailService;
+export const staffEmailService: EmailService = gmailEmailService;

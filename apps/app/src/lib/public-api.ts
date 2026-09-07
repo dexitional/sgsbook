@@ -18,6 +18,7 @@ export interface PublicBooking {
   itemType: "FACILITY" | "ADDON";
   bookStart: string;
   bookEnd: string;
+  status: "APPROVED" | "COMPLETED";
 }
 
 export async function fetchPublicFacilities(): Promise<PublicFacility[]> {

@@ -24,11 +24,17 @@ import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { Checkbox } from "#/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
-import { createBookingRequest, getCustomerRequests } from "#/server/customer";
-import { fetchPublicFacilities, type PublicFacility } from "#/lib/public-api";
+import { createBookingRequest, getBookableItems, getCustomerRequests } from "#/server/customer";
 import type { RequestStatus } from "#/lib/customer-types";
 
 export const Route = createFileRoute("/_customer/requests")({ component: RequestsPage });
+
+interface BookableItem {
+  id: string;
+  title: string;
+  itemType: "FACILITY" | "ADDON";
+  amount: number | null;
+}
 
 interface RequestPackageAddon {
   id: string;
@@ -224,8 +230,8 @@ function PackageFields({
   register: UseFormRegister<NewRequestForm>;
   setValue: UseFormSetValue<NewRequestForm>;
   errors: FieldErrors<NewRequestForm>;
-  facilities: PublicFacility[];
-  addons: PublicFacility[];
+  facilities: BookableItem[];
+  addons: BookableItem[];
   onRemove?: () => void;
 }) {
   const addonItemIds = useWatch({ control, name: `packages.${index}.addonItemIds` }) ?? [];
@@ -305,8 +311,8 @@ function InvoicePreview({
   addons,
 }: {
   control: Control<NewRequestForm>;
-  facilities: PublicFacility[];
-  addons: PublicFacility[];
+  facilities: BookableItem[];
+  addons: BookableItem[];
 }) {
   const packages = useWatch({ control, name: "packages" });
 
@@ -352,7 +358,7 @@ function InvoicePreview({
 function NewRequestDialog() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
-  const items = useQuery({ queryKey: ["public-facilities"], queryFn: fetchPublicFacilities });
+  const items = useQuery({ queryKey: ["bookable-items"], queryFn: () => getBookableItems() });
   const facilities = items.data?.filter((i) => i.itemType === "FACILITY") ?? [];
   const addons = items.data?.filter((i) => i.itemType === "ADDON") ?? [];
   const {
@@ -369,17 +375,26 @@ function NewRequestDialog() {
   const { fields, append, remove } = useFieldArray({ control, name: "packages" });
 
   const onSubmit = handleSubmit(async (values) => {
-    await createBookingRequest({
-      data: {
-        title: values.title,
-        packages: values.packages.map((pkg) => ({
-          itemId: pkg.itemId,
-          bookStart: new Date(pkg.bookStart).toISOString(),
-          bookEnd: new Date(pkg.bookEnd).toISOString(),
-          addonItemIds: pkg.addonItemIds.length > 0 ? pkg.addonItemIds : undefined,
-        })),
-      },
-    });
+    try {
+      await createBookingRequest({
+        data: {
+          title: values.title,
+          packages: values.packages.map((pkg) => ({
+            itemId: pkg.itemId,
+            bookStart: new Date(pkg.bookStart).toISOString(),
+            bookEnd: new Date(pkg.bookEnd).toISOString(),
+            addonItemIds: pkg.addonItemIds.length > 0 ? pkg.addonItemIds : undefined,
+          })),
+        },
+      });
+    } catch (err) {
+      // Leave the dialog open (with whatever the customer already entered)
+      // so they can pick a different time instead of starting over —
+      // most commonly this is the scheduling-conflict check rejecting an
+      // already-booked period.
+      toast.error(err instanceof Error ? err.message : "Couldn't submit booking request");
+      return;
+    }
     await queryClient.invalidateQueries({ queryKey: ["customer-requests"] });
     setOpen(false);
     reset({ title: "", packages: [emptyPackage] });

@@ -1,6 +1,8 @@
 import { prisma, Prisma } from "@sgs/db";
 import type { z } from "zod";
 import { emailService } from "../../lib/email.js";
+import { smsService } from "../../lib/sms.js";
+import { buildReceiptEmail, getLogoAttachment } from "../../lib/invoice-email.js";
 import type { listPaymentsQuerySchema, recordPaymentSchema } from "./schema.js";
 
 type RecordPaymentInput = z.infer<typeof recordPaymentSchema>;
@@ -44,20 +46,42 @@ export async function getPayment(id: string) {
 export async function recordPayment(input: RecordPaymentInput, createdBy: number) {
   const payment = await prisma.ubsPayment.create({
     data: { ...input, createdBy },
-    include: { request: { include: { client: true } } },
+    include: {
+      request: {
+        include: { client: true, packages: { include: { bookItem: true, UbsAddon: { include: { item: true } } } } },
+      },
+    },
   });
 
   const client = payment.request?.client;
-  if (client?.email) {
+  if (client?.email && payment.request) {
+    const receiptEmail = buildReceiptEmail({
+      paymentId: payment.id,
+      title: payment.request.title,
+      clientName: client.organisation || client.name,
+      chargeAmount: payment.request.chargeAmount,
+      paidAmount: payment.paidAmount,
+      paidRef: payment.paidRef,
+      paidAt: payment.paidAt,
+      packages: payment.request.packages,
+    });
     void emailService
       .send({
         to: client.email,
-        subject: `Payment received — ${payment.request?.title ?? "your booking"}`,
-        html: `<p>Hi ${client.name},</p><p>We've recorded a payment of <strong>${payment.paidAmount}</strong>${
-          payment.paidRef ? ` (ref: ${payment.paidRef})` : ""
-        } for "${payment.request?.title}".</p>`,
+        subject: receiptEmail.subject,
+        html: receiptEmail.html,
+        attachments: [getLogoAttachment()],
       })
       .catch((err) => console.error("Failed to send payment receipt email:", err));
+  }
+
+  if (client?.phone) {
+    void smsService
+      .send(
+        [client.phone],
+        `Hi ${client.name}, we've recorded a payment of GHS ${payment.paidAmount} for "${payment.request?.title ?? "your booking"}". Thank you.`,
+      )
+      .catch((err) => console.error("Failed to send payment receipt SMS:", err));
   }
 
   return payment;

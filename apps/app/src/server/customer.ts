@@ -147,12 +147,46 @@ export const getPaymentInvoice = createServerFn({ method: "GET" })
     return payment;
   });
 
+// Separate from the public /public/items endpoint (landing page only shows
+// FACILITY items to anonymous visitors) — the authenticated booking form
+// needs ADDON items too, so it can't reuse that one.
+export const getBookableItems = createServerFn({ method: "GET" }).handler(async () => {
+  await requireCustomerClient();
+  return prisma.ubsItem.findMany({
+    where: { status: true },
+    select: { id: true, title: true, itemType: true, amount: true },
+    orderBy: { title: "asc" },
+  });
+});
+
 const bookingPackageSchema = z.object({
   itemId: z.string().min(1),
   bookStart: z.coerce.date(),
   bookEnd: z.coerce.date(),
   addonItemIds: z.array(z.string()).optional(),
 });
+
+// Only APPROVED/COMPLETED bookings count as actually "locked" — matches the
+// public calendar's own convention (listPublicCalendar), since a PENDED
+// request is still just a request and hasn't claimed the slot yet.
+async function assertNoSchedulingConflicts(packages: { itemId: string; bookStart: Date; bookEnd: Date }[]) {
+  for (const pkg of packages) {
+    const conflict = await prisma.ubsPackage.findFirst({
+      where: {
+        itemId: pkg.itemId,
+        bookStart: { lt: pkg.bookEnd },
+        bookEnd: { gt: pkg.bookStart },
+        request: { status: { in: ["APPROVED", "COMPLETED"] } },
+      },
+      include: { bookItem: true },
+    });
+    if (conflict) {
+      throw new Error(
+        `${conflict.bookItem.title} is already booked from ${conflict.bookStart?.toLocaleString()} to ${conflict.bookEnd?.toLocaleString()}. Please choose a different time.`,
+      );
+    }
+  }
+}
 
 const createBookingRequestSchema = z.object({
   title: z.string().min(1),
@@ -164,6 +198,8 @@ export const createBookingRequest = createServerFn({ method: "POST" })
   .inputValidator(createBookingRequestSchema)
   .handler(async ({ data }) => {
     const { client } = await requireCustomerClient();
+
+    await assertNoSchedulingConflicts(data.packages);
 
     const itemIds = Array.from(new Set(data.packages.flatMap((pkg) => [pkg.itemId, ...(pkg.addonItemIds ?? [])])));
     const items = await prisma.ubsItem.findMany({ where: { id: { in: itemIds } } });

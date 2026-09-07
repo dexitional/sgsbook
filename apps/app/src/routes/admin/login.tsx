@@ -1,8 +1,9 @@
+import { useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useLogin } from "#/lib/queries/session";
+import { useAdminSession, useLogin } from "#/lib/queries/session";
 import { ApiError } from "#/lib/api-client";
 import { asset } from "#/lib/asset";
 
@@ -25,6 +26,7 @@ const SEGOE_STACK =
 function LoginPage() {
   const navigate = useNavigate();
   const login = useLogin();
+  const session = useAdminSession();
   const {
     register,
     handleSubmit,
@@ -34,6 +36,21 @@ function LoginPage() {
   const onSubmit = handleSubmit((values) => {
     login.mutate(values, { onSuccess: () => navigate({ to: "/admin" }) });
   });
+
+  useEffect(() => {
+    if (session.data?.user) navigate({ to: "/admin" });
+  }, [session.data, navigate]);
+
+  if (session.isLoading || session.data?.user) {
+    return (
+      <div
+        className="flex min-h-screen items-center justify-center bg-[#f3f3f3] text-black/60"
+        style={{ fontFamily: SEGOE_STACK }}
+      >
+        Loading…
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f3f3f3] px-4" style={{ fontFamily: SEGOE_STACK }}>
@@ -81,7 +98,7 @@ function LoginPage() {
 
           <div className="flex justify-end gap-1 pt-6">
             <a
-              href="/admin"
+              href="/"
               className="flex h-8 min-w-[100px] items-center justify-center bg-black/20 px-3 text-[15px] text-black transition-colors hover:bg-black/30"
             >
               Back

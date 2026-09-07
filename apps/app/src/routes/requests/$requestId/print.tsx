@@ -124,6 +124,14 @@ function PrintRequestInvoicePage() {
           </div>
         </div>
 
+        <div className="border-t border-border pt-4 text-sm">
+          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Pay to</p>
+          <p className="mt-1 text-[11px] font-bold text-gray-500">School of Graduate Studies,</p>
+          <p className="text-[11px] font-bold text-gray-500">National Investment Bank,</p>
+          <p className="text-[11px] font-bold text-gray-500">Account No. 1111000120801</p>
+          <p className="text-[11px] font-bold text-gray-500">Cape Coast</p>
+        </div>
+
         <p className="border-t border-border pt-4 text-center text-xs text-muted-foreground">
           Thank you for booking with us.
         </p>

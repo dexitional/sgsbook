@@ -76,8 +76,17 @@ function BannerBackground() {
   return (
     <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden bg-[#0b1220]">
       <motion.img
-        src={asset("banner.jpg")}
+        src={asset("banner.webp")}
         alt=""
+        // This is the page's LCP element — eager-load with high fetch
+        // priority (default for a non-lazy <img>, but explicit here since
+        // it's easy to accidentally regress) and explicit intrinsic
+        // dimensions so the browser can reserve layout space before the
+        // image itself has loaded.
+        width={1194}
+        height={748}
+        fetchPriority="high"
+        decoding="async"
         className="size-full object-cover"
         initial={{ scale: 1.08 }}
         animate={{ scale: 1 }}

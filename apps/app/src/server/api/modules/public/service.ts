@@ -32,6 +32,7 @@ export async function listPublicCalendar(from: Date, to: Date) {
       bookStart: true,
       bookEnd: true,
       bookItem: { select: { id: true, title: true, itemType: true } },
+      request: { select: { status: true } },
     },
     orderBy: { bookStart: "asc" },
   });
@@ -43,5 +44,6 @@ export async function listPublicCalendar(from: Date, to: Date) {
     itemType: p.bookItem.itemType,
     bookStart: p.bookStart,
     bookEnd: p.bookEnd,
+    status: p.request.status,
   }));
 }

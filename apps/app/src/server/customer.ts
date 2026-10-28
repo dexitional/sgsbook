@@ -4,6 +4,9 @@ import { z } from "zod";
 import { prisma } from "@sgs/db";
 import { auth } from "#/lib/auth";
 import { computeRequestInvoice, type PackageInput } from "@sgs/ui";
+import { assertAvailable } from "#/server/api/lib/availability";
+import { sweepUnpaidApprovalsThrottled } from "#/server/api/lib/payment-deadline";
+import { extendRequest, rescheduleRequest } from "#/server/api/lib/reschedule";
 
 async function getSession() {
   return auth.api.getSession({ headers: getRequestHeaders() as unknown as Headers });
@@ -90,6 +93,7 @@ export const completeOnboarding = createServerFn({ method: "POST" })
 
 export const getCustomerRequests = createServerFn({ method: "GET" }).handler(async () => {
   const { client } = await requireCustomerClient();
+  await sweepUnpaidApprovalsThrottled();
   return prisma.ubsRequest.findMany({
     where: { clientId: client.id },
     include: { packages: { include: { bookItem: true, UbsAddon: { include: { item: true } } } }, payment: true },
@@ -120,6 +124,8 @@ export const getRequestInvoice = createServerFn({ method: "GET" })
       include: {
         client: true,
         packages: { include: { bookItem: true, UbsAddon: { include: { item: true } } } },
+        // For the Paid / Balance due lines after an extension.
+        payment: { where: { status: true }, select: { paidAmount: true } },
       },
     });
 
@@ -166,28 +172,6 @@ const bookingPackageSchema = z.object({
   addonItemIds: z.array(z.string()).optional(),
 });
 
-// Only APPROVED/COMPLETED bookings count as actually "locked" — matches the
-// public calendar's own convention (listPublicCalendar), since a PENDED
-// request is still just a request and hasn't claimed the slot yet.
-async function assertNoSchedulingConflicts(packages: { itemId: string; bookStart: Date; bookEnd: Date }[]) {
-  for (const pkg of packages) {
-    const conflict = await prisma.ubsPackage.findFirst({
-      where: {
-        itemId: pkg.itemId,
-        bookStart: { lt: pkg.bookEnd },
-        bookEnd: { gt: pkg.bookStart },
-        request: { status: { in: ["APPROVED", "COMPLETED"] } },
-      },
-      include: { bookItem: true },
-    });
-    if (conflict) {
-      throw new Error(
-        `${conflict.bookItem.title} is already booked from ${conflict.bookStart?.toLocaleString()} to ${conflict.bookEnd?.toLocaleString()}. Please choose a different time.`,
-      );
-    }
-  }
-}
-
 const createBookingRequestSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
@@ -199,7 +183,8 @@ export const createBookingRequest = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { client } = await requireCustomerClient();
 
-    await assertNoSchedulingConflicts(data.packages);
+    // Rejects overlaps with approved bookings and admin-blocked dates.
+    await assertAvailable(data.packages);
 
     const itemIds = Array.from(new Set(data.packages.flatMap((pkg) => [pkg.itemId, ...(pkg.addonItemIds ?? [])])));
     const items = await prisma.ubsItem.findMany({ where: { id: { in: itemIds } } });
@@ -243,4 +228,49 @@ export const createBookingRequest = createServerFn({ method: "POST" })
         include: { packages: { include: { bookItem: true, UbsAddon: { include: { item: true } } } } },
       });
     });
+  });
+
+const rescheduleBookingSchema = z.object({
+  requestId: z.string().min(1),
+  reason: z.string().trim().min(1).max(650),
+  packages: z
+    .array(z.object({ packageId: z.string().min(1), bookStart: z.coerce.date(), bookEnd: z.coerce.date() }))
+    .min(1),
+});
+
+// Customer-initiated move to a new period for emergencies/unforeseen events
+// — re-priced on the new period only. Same rules and audit trail as the
+// staff endpoint (see lib/reschedule.ts).
+export const rescheduleBooking = createServerFn({ method: "POST" })
+  .inputValidator(rescheduleBookingSchema)
+  .handler(async ({ data }) => {
+    const { session, client } = await requireCustomerClient();
+    const { requestId, ...input } = data;
+    await rescheduleRequest(requestId, input, {
+      changedBy: `client:${session.user.email}`,
+      byStaff: false,
+      clientId: client.id,
+    });
+    return { ok: true };
+  });
+
+const extendBookingSchema = z.object({
+  requestId: z.string().min(1),
+  reason: z.string().trim().min(1).max(650),
+  packages: z.array(z.object({ packageId: z.string().min(1), bookEnd: z.coerce.date() })).min(1),
+});
+
+// Customer-initiated extension: keeps the start, pushes the end later, and
+// adds the extra days to the total as a balance due.
+export const extendBooking = createServerFn({ method: "POST" })
+  .inputValidator(extendBookingSchema)
+  .handler(async ({ data }) => {
+    const { session, client } = await requireCustomerClient();
+    const { requestId, ...input } = data;
+    await extendRequest(requestId, input, {
+      changedBy: `client:${session.user.email}`,
+      byStaff: false,
+      clientId: client.id,
+    });
+    return { ok: true };
   });

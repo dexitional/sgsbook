@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { LayoutDashboard, LogOut, Menu, Moon, Receipt, Search, Sun } from "lucide-react";
+import { BookOpen, CalendarPlus, LayoutDashboard, LogOut, Menu, Moon, Receipt, Search, Sun } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "#/components/ui/dropdown-menu";
 import { Input } from "#/components/ui/input";
+import { Button } from "#/components/ui/button";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "#/components/ui/sheet";
 import { IconButton, useThemeStore } from "@sgs/ui";
 import { getCurrentCustomer } from "#/server/customer";
 import { authClient } from "#/lib/auth-client";
 import { asset } from "#/lib/asset";
+import { takeBookingIntent, takeQuickBookOnSignIn, type BookingIntent } from "#/lib/booking-intent";
+import { CustomerBookingDialog } from "#/components/customer-booking-dialog";
 
 export const Route = createFileRoute("/_customer")({ component: CustomerLayout });
 
@@ -17,6 +20,7 @@ const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/requests", label: "Bookings", icon: Receipt },
   { to: "/receipts", label: "Receipts", icon: Receipt },
+  { to: "/guide", label: "User guide", icon: BookOpen },
 ] as const;
 
 function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
@@ -49,6 +53,23 @@ function CustomerLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const customer = useQuery({ queryKey: ["customer"], queryFn: () => getCurrentCustomer() });
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [quickBook, setQuickBook] = useState<{ open: boolean; intent: BookingIntent | null; welcome: boolean }>({
+    open: false,
+    intent: null,
+    welcome: false,
+  });
+  const ready = Boolean(customer.data?.authenticated && customer.data.client && customer.data.client.contacts.length > 0);
+
+  // Request on-boarding: right after sign-in (flag set by AuthCard), or after
+  // picking a day on the public calendar, open the quick-booking dialog —
+  // prefilled with the calendar choice when there is one. Both are one-shot
+  // ("take" clears them), so it doesn't reappear on every navigation.
+  useEffect(() => {
+    if (!ready) return;
+    const intent = takeBookingIntent();
+    const justSignedIn = takeQuickBookOnSignIn();
+    if (intent || justSignedIn) setQuickBook({ open: true, intent, welcome: !intent });
+  }, [ready]);
 
   useEffect(() => {
     if (!customer.data) return;
@@ -144,6 +165,14 @@ function CustomerLayout() {
           </div>
 
           <div className="ml-auto flex items-center gap-3">
+            <Button
+              size="sm"
+              className="hidden sm:inline-flex"
+              onClick={() => setQuickBook({ open: true, intent: null, welcome: false })}
+            >
+              <CalendarPlus className="size-4" />
+              Quick booking
+            </Button>
             <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -176,6 +205,27 @@ function CustomerLayout() {
           <Outlet />
         </main>
       </div>
+
+      <CustomerBookingDialog
+        open={quickBook.open}
+        onOpenChange={(open) => setQuickBook((q) => ({ ...q, open }))}
+        initial={quickBook.intent}
+        heading={quickBook.welcome ? `Welcome, ${user.name?.split(" ")[0] ?? "there"} 👋` : "Quick booking request"}
+        intro={
+          quickBook.intent ? (
+            "We've filled in the facility and dates you picked on the calendar. Add a title and any addons, then submit."
+          ) : quickBook.welcome ? (
+            <>
+              Ready to book? Pick a facility and dates to send a request now, or close this and explore your dashboard.
+              See the{" "}
+              <Link to="/guide" className="font-medium text-primary underline-offset-2 hover:underline" onClick={() => setQuickBook((q) => ({ ...q, open: false }))}>
+                user guide
+              </Link>{" "}
+              for how approval and payment work.
+            </>
+          ) : undefined
+        }
+      />
     </div>
   );
 }

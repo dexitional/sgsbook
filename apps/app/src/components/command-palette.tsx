@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { LayoutDashboard, LogOut, Moon, Package, Receipt, Sun, Users, UserSquare2, Wallet } from "lucide-react";
+import { BookOpen, CalendarOff, LayoutDashboard, LogOut, Moon, Package, Receipt, Sun, Users, UserSquare2, Wallet } from "lucide-react";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "#/components/ui/command";
 import { useThemeStore } from "@sgs/ui";
 import { useLogout } from "#/lib/queries/session";
@@ -11,7 +11,9 @@ const pages = [
   { to: "/admin/items", label: "Facilities", icon: Package },
   { to: "/admin/requests", label: "Bookings", icon: Receipt },
   { to: "/admin/payments", label: "Payments", icon: Wallet },
+  { to: "/admin/blocked-dates", label: "Blocked dates", icon: CalendarOff },
   { to: "/admin/users", label: "Users", icon: Users },
+  { to: "/admin/guide", label: "User guide", icon: BookOpen },
 ] as const;
 
 export function CommandPalette() {

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import {
   HeadContent,
   Scripts,
@@ -49,6 +50,33 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  // A tab left open across a deploy still references the previous build's
+  // hashed chunk filenames (e.g. _web-D5ClNbfq.js) — once a new build
+  // replaces .output/public/assets with fresh hashes, that exact file 404s
+  // and Vite's dynamic import throws "Failed to fetch dynamically imported
+  // module". Vite dispatches a cancelable `vite:preloadError` event for
+  // this exact case; reload once to pick up the current build instead of
+  // surfacing the error. Guarded with a sessionStorage flag so a genuinely
+  // broken deploy can't reload-loop — the flag clears a few seconds after a
+  // successful mount so recovery still works again after a *later* deploy.
+  useEffect(() => {
+    const key = 'sgs-preload-error-reload'
+    const clearFlag = setTimeout(() => sessionStorage.removeItem(key), 5000)
+
+    function handlePreloadError(event: Event) {
+      event.preventDefault()
+      if (sessionStorage.getItem(key)) return
+      sessionStorage.setItem(key, '1')
+      window.location.reload()
+    }
+
+    window.addEventListener('vite:preloadError', handlePreloadError)
+    return () => {
+      clearTimeout(clearFlag)
+      window.removeEventListener('vite:preloadError', handlePreloadError)
+    }
+  }, [])
+
   return (
     <html lang="en">
       <head>

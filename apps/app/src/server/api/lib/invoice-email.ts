@@ -101,11 +101,16 @@ function wrapEmail(input: {
     </div>`;
 }
 
+export function escapeHtml(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 export function buildInvoiceEmail(input: {
   requestId: string;
   title: string;
   clientName: string;
   chargeAmount: number | null;
+  paymentDueAt?: Date | string | null;
   packages: EmailPackageLine[];
 }): { subject: string; html: string } {
   const totalsRow = `
@@ -118,7 +123,11 @@ export function buildInvoiceEmail(input: {
     label: "Invoice",
     refValue: input.requestId.slice(0, 8).toUpperCase(),
     clientName: input.clientName,
-    infoHtml: `<p style="margin:0 0 4px;">Your booking request "<strong>${input.title}</strong>" has been approved. Please find the invoice below.</p>`,
+    infoHtml: `<p style="margin:0 0 4px;">Your booking request "<strong>${input.title}</strong>" has been approved. Please find the invoice below.</p>${
+      input.paymentDueAt
+        ? `<p style="margin:8px 0 0;padding:8px 10px;border-radius:6px;background:#fef2f2;color:#991b1b;font-size:13px;">Please make payment by <strong>${formatWhen(input.paymentDueAt)}</strong>. Requests not paid within 24 hours of approval are automatically declined.</p>`
+        : ""
+    }`,
     rowsHtml: renderPackageRows(input.packages) + totalsRow,
     footerHtml: PAY_TO_BLOCK,
   });
@@ -158,4 +167,75 @@ export function buildReceiptEmail(input: {
   });
 
   return { subject: `Receipt for your payment: ${input.title}`, html };
+}
+
+export function buildRejectionEmail(input: {
+  requestId: string;
+  title: string;
+  clientName: string;
+  reason: string;
+  packages: EmailPackageLine[];
+}): { subject: string; html: string } {
+  const html = wrapEmail({
+    label: "Request declined",
+    refValue: input.requestId.slice(0, 8).toUpperCase(),
+    clientName: input.clientName,
+    infoHtml: `
+      <p style="margin:0 0 4px;">Unfortunately your booking request "<strong>${input.title}</strong>" could not be approved.</p>
+      <p style="margin:8px 0 0;padding:8px 10px;border-radius:6px;background:#fef2f2;color:#991b1b;font-size:13px;"><strong>Reason:</strong> ${escapeHtml(input.reason)}</p>`,
+    rowsHtml: renderPackageRows(input.packages),
+    footerHtml: `<p style="margin-top:16px;font-size:13px;color:#6b7280;">You're welcome to submit a new request for a different date or facility from your dashboard.</p>`,
+  });
+
+  return { subject: `Booking request declined: ${input.title}`, html };
+}
+
+export function buildScheduleChangeEmail(input: {
+  type: "RESCHEDULE" | "EXTENSION";
+  requestId: string;
+  title: string;
+  clientName: string;
+  reason: string;
+  changedByStaff: boolean;
+  chargeBefore: number;
+  chargeAmount: number;
+  paidAmount: number;
+  packages: EmailPackageLine[];
+}): { subject: string; html: string } {
+  const extended = input.type === "EXTENSION";
+  const balance = input.chargeAmount - input.paidAmount;
+  const money = (value: number) => `GHS ${value.toLocaleString()}`;
+  const row = (label: string, value: string, strong = false) => `
+    <tr>
+      <td colspan="2" style="padding-top:6px;text-align:right;${strong ? "font-weight:600;" : "color:#6b7280;"}">${label}</td>
+      <td style="padding-top:6px;text-align:right;font-family:monospace;white-space:nowrap;${strong ? "font-weight:600;" : "color:#6b7280;"}">${value}</td>
+    </tr>`;
+
+  // Extension: previous total + extra = new total. Reschedule: the total is
+  // simply what the new period costs; the previous one only for reference.
+  const totalsRows = [
+    row(extended ? "Original total" : "Previous total", money(input.chargeBefore)),
+    extended ? row("Extension", `+ ${money(input.chargeAmount - input.chargeBefore)}`) : "",
+    row(extended ? "New total" : "New total (new period)", money(input.chargeAmount), true),
+    input.paidAmount > 0 ? row("Paid so far", money(input.paidAmount)) : "",
+    balance > 0 ? row("Balance due", money(balance), true) : "",
+    balance < 0 ? row("Credit", money(-balance), true) : "",
+  ].join("");
+
+  const html = wrapEmail({
+    label: extended ? "Booking extended" : "Booking rescheduled",
+    refValue: input.requestId.slice(0, 8).toUpperCase(),
+    clientName: input.clientName,
+    infoHtml: `
+      <p style="margin:0 0 4px;">${
+        extended
+          ? `Your booking "<strong>${input.title}</strong>" has been extended${input.changedByStaff ? " by our team" : ""}. The extra days are added to your invoice below.`
+          : `The dates for your booking "<strong>${input.title}</strong>" have been changed${input.changedByStaff ? " by our team" : ""}. Your invoice is now based on the new period only.`
+      }</p>
+      <p style="margin:8px 0 0;font-size:13px;color:#6b7280;"><strong>Reason:</strong> ${escapeHtml(input.reason)}</p>`,
+    rowsHtml: renderPackageRows(input.packages) + totalsRows,
+    footerHtml: balance > 0 ? PAY_TO_BLOCK : "",
+  });
+
+  return { subject: `Booking ${extended ? "extended" : "rescheduled"}: ${input.title}`, html };
 }

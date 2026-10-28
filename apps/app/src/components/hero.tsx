@@ -33,7 +33,7 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.16 }}
               className="text-balance text-2xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl"
             >
-              Seminar rooms to conference halls.
+              Seminar rooms to the Auditorium.
               <br />
               <span className="text-[#7fd4ff]">Reserved in clicks.</span>
             </motion.h1>

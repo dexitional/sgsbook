@@ -3,7 +3,13 @@ import { zValidator } from "@hono/zod-validator";
 import { requireAdminRole } from "../../middleware/requireAdminRole.js";
 import { ANY_STAFF, STAFF } from "../../lib/roles.js";
 import { AppError } from "../../middleware/error-handler.js";
-import { createRequestSchema, listRequestsQuerySchema, updateStatusSchema } from "./schema.js";
+import {
+  createRequestSchema,
+  extendRequestSchema,
+  listRequestsQuerySchema,
+  rescheduleRequestSchema,
+  updateStatusSchema,
+} from "./schema.js";
 import * as service from "./service.js";
 
 export const requestsRoute = new Hono()
@@ -25,5 +31,15 @@ export const requestsRoute = new Hono()
   })
   .patch("/:id/status", requireAdminRole(STAFF), zValidator("json", updateStatusSchema), async (c) => {
     const request = await service.updateStatus(c.req.param("id"), c.req.valid("json"));
+    return c.json({ request });
+  })
+  .patch("/:id/schedule", requireAdminRole(STAFF), zValidator("json", rescheduleRequestSchema), async (c) => {
+    const admin = c.get("adminUser");
+    const request = await service.rescheduleRequest(c.req.param("id"), c.req.valid("json"), `staff:${admin.username}`);
+    return c.json({ request });
+  })
+  .patch("/:id/extend", requireAdminRole(STAFF), zValidator("json", extendRequestSchema), async (c) => {
+    const admin = c.get("adminUser");
+    const request = await service.extendRequest(c.req.param("id"), c.req.valid("json"), `staff:${admin.username}`);
     return c.json({ request });
   });

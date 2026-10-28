@@ -47,3 +47,22 @@ export async function listPublicCalendar(from: Date, to: Date) {
     status: p.request.status,
   }));
 }
+
+// Admin-blocked windows overlapping the range. Exposes only the facility and
+// the admin-written reason — no request/client data is involved at all.
+export async function listPublicBlockedDates(from: Date, to: Date) {
+  const blocks = await prisma.ubsBlockedDate.findMany({
+    where: { blockStart: { lte: to }, blockEnd: { gte: from } },
+    select: { id: true, itemId: true, blockStart: true, blockEnd: true, reason: true, item: { select: { title: true } } },
+    orderBy: { blockStart: "asc" },
+  });
+
+  return blocks.map((b) => ({
+    id: b.id,
+    itemId: b.itemId,
+    itemTitle: b.item?.title ?? null,
+    blockStart: b.blockStart,
+    blockEnd: b.blockEnd,
+    reason: b.reason,
+  }));
+}

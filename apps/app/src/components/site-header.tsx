@@ -7,9 +7,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "#/co
 import { authClient } from "#/lib/auth-client";
 import { asset } from "#/lib/asset";
 
+// Absolute ("/#…") so the anchors still work from other public pages like
+// /guide — on the homepage itself the browser just scrolls.
 const NAV_LINKS = [
-  { href: "#facilities", label: "Facilities" },
-  { href: "#calendar", label: "Availability" },
+  { href: "/#facilities", label: "Facilities" },
+  { href: "/#calendar", label: "Availability" },
+  { href: "/guide", label: "User guide" },
 ];
 
 export function SiteHeader() {

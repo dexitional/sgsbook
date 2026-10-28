@@ -4,32 +4,35 @@ import { emailService, staffEmailService } from "../../lib/email.js";
 import { smsService } from "../../lib/sms.js";
 import { buildInvoiceEmail, getLogoAttachment } from "../../lib/invoice-email.js";
 import { computeRequestInvoice, type PackageInput } from "../../lib/pricing.js";
-import type { createRequestSchema, listRequestsQuerySchema, updateStatusSchema } from "./schema.js";
-
-// Staff who should be alerted to prepare the facility once a booking is
-// approved — every active user with a role on this app, regardless of which
-// role (admin, facilitator, decorator all get notified).
-async function getActiveStaffContacts() {
-  const app = await prisma.app.findUnique({ where: { tag: "ubs" } });
-  if (!app) return [];
-  const users = await prisma.user.findMany({
-    where: { status: true, userRole: { some: { status: true, appRole: { appId: app.id } } } },
-    select: { name: true, username: true, email: true, phone: true },
-  });
-  return users;
-}
+import { assertAvailable } from "../../lib/availability.js";
+import { paymentDueFrom, sweepUnpaidApprovalsThrottled } from "../../lib/payment-deadline.js";
+import { getActiveStaffContacts, notifyRequestRejected } from "../../lib/request-notifications.js";
+import { extendRequest as extendRequestCore, rescheduleRequest as rescheduleRequestCore } from "../../lib/reschedule.js";
+import { AppError } from "../../middleware/error-handler.js";
+import type {
+  createRequestSchema,
+  extendRequestSchema,
+  listRequestsQuerySchema,
+  rescheduleRequestSchema,
+  updateStatusSchema,
+} from "./schema.js";
 
 type CreateRequestInput = z.infer<typeof createRequestSchema>;
 type UpdateStatusInput = z.infer<typeof updateStatusSchema>;
 type ListQuery = z.infer<typeof listRequestsQuerySchema>;
+type RescheduleInput = z.infer<typeof rescheduleRequestSchema>;
+type ExtendInput = z.infer<typeof extendRequestSchema>;
 
 const detailInclude = {
   client: { include: { contacts: true } },
   packages: { include: { bookItem: true, UbsAddon: { include: { item: true } } } },
   payment: true,
+  reschedules: { orderBy: { createdAt: "desc" } },
 } satisfies Prisma.UbsRequestInclude;
 
 export async function listRequests(query: ListQuery) {
+  await sweepUnpaidApprovalsThrottled();
+
   const where: Prisma.UbsRequestWhereInput = {
     ...(query.status ? { status: query.status } : {}),
     ...(query.clientId ? { clientId: query.clientId } : {}),
@@ -38,7 +41,13 @@ export async function listRequests(query: ListQuery) {
   const [items, total] = await Promise.all([
     prisma.ubsRequest.findMany({
       where,
-      include: { client: true, packages: { include: { bookItem: true } } },
+      include: {
+        client: true,
+        // Addons + payment amounts let the list show balances and price
+        // reschedule/extension previews without a detail fetch per row.
+        packages: { include: { bookItem: true, UbsAddon: { include: { item: true } } } },
+        payment: { where: { status: true }, select: { id: true, paidAmount: true } },
+      },
       orderBy: { createdAt: "desc" },
       skip: (query.page - 1) * query.pageSize,
       take: query.pageSize,
@@ -75,6 +84,8 @@ export async function createRequest(input: CreateRequestInput, createdBy: number
     };
   });
 
+  await assertAvailable(input.packages);
+
   const invoice = computeRequestInvoice(pricingPackages);
 
   return prisma.$transaction(async (tx) => {
@@ -110,11 +121,34 @@ export async function createRequest(input: CreateRequestInput, createdBy: number
 }
 
 export async function updateStatus(id: string, input: UpdateStatusInput) {
+  const existing = await prisma.ubsRequest.findUnique({ where: { id }, include: { packages: true } });
+  if (!existing) throw new AppError("Request not found.", 404);
+
+  if (input.status === "APPROVED") {
+    // Re-check at approval time: the slot may have been taken by another
+    // approval, or blocked by an admin, since this request was submitted.
+    await assertAvailable(
+      existing.packages
+        .filter((p) => p.bookStart && p.bookEnd)
+        .map((p) => ({ itemId: p.itemId, bookStart: p.bookStart!, bookEnd: p.bookEnd! })),
+      { excludeRequestId: id },
+    );
+  }
+
+  const reason = input.reason?.trim();
   const request = await prisma.ubsRequest.update({
     where: { id },
-    data: { status: input.status },
+    data: {
+      status: input.status,
+      ...(input.status === "APPROVED" ? { paymentDueAt: paymentDueFrom(new Date()), rejectReason: null } : {}),
+      ...(input.status === "REJECTED" ? { rejectReason: reason } : {}),
+    },
     include: detailInclude,
   });
+
+  if (input.status === "REJECTED" && reason) {
+    notifyRequestRejected(request, reason);
+  }
 
   if (input.status === "APPROVED") {
     // Best-effort throughout — a booking's approval must not fail because
@@ -125,6 +159,7 @@ export async function updateStatus(id: string, input: UpdateStatusInput) {
         title: request.title,
         clientName: request.client.organisation || request.client.name,
         chargeAmount: request.chargeAmount,
+        paymentDueAt: request.paymentDueAt,
         packages: request.packages,
       });
       void emailService
@@ -139,7 +174,7 @@ export async function updateStatus(id: string, input: UpdateStatusInput) {
 
     if (request.client?.phone) {
       void smsService
-        .send([request.client.phone], `Hi ${request.client.name}, your booking "${request.title}" has been approved.`)
+        .send([request.client.phone], `Hi ${request.client.name}, your booking "${request.title}" has been approved. Please pay GHS ${(request.chargeAmount ?? 0).toLocaleString()} by ${request.paymentDueAt?.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })} or the request will be declined.`)
         .catch((err) => console.error("Failed to send approval SMS to client:", err));
     }
 
@@ -175,4 +210,14 @@ export async function updateStatus(id: string, input: UpdateStatusInput) {
   }
 
   return request;
+}
+
+export async function rescheduleRequest(id: string, input: RescheduleInput, changedBy: string) {
+  await rescheduleRequestCore(id, input, { changedBy, byStaff: true });
+  return getRequest(id);
+}
+
+export async function extendRequest(id: string, input: ExtendInput, changedBy: string) {
+  await extendRequestCore(id, input, { changedBy, byStaff: true });
+  return getRequest(id);
 }

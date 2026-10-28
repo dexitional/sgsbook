@@ -12,6 +12,9 @@ export const publicRoute = new Hono()
   })
   .get("/calendar", zValidator("query", calendarQuerySchema), async (c) => {
     const { from, to } = c.req.valid("query");
-    const bookings = await service.listPublicCalendar(from, to);
-    return c.json({ bookings });
+    const [bookings, blocked] = await Promise.all([
+      service.listPublicCalendar(from, to),
+      service.listPublicBlockedDates(from, to),
+    ]);
+    return c.json({ bookings, blocked });
   });

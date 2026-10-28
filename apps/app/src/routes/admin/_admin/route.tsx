@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
+  BookOpen,
+  CalendarOff,
   Command as CommandIcon,
   LayoutDashboard,
   LogOut,
@@ -33,7 +35,9 @@ const navItems = [
   { to: "/admin/items", label: "Facilities", icon: Package },
   { to: "/admin/requests", label: "Bookings", icon: Receipt },
   { to: "/admin/payments", label: "Payments", icon: Wallet },
+  { to: "/admin/blocked-dates", label: "Blocked dates", icon: CalendarOff },
   { to: "/admin/users", label: "Users", icon: Users },
+  { to: "/admin/guide", label: "User guide", icon: BookOpen },
 ] as const;
 
 function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {

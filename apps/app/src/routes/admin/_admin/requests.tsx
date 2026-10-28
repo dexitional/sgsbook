@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { createColumnHelper } from "@tanstack/react-table";
-import { format } from "date-fns";
+import { format, formatDistanceToNowStrict } from "date-fns";
 import {
   useFieldArray,
   useForm,
@@ -14,19 +14,40 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { FileText, Plus, Printer, Trash2 } from "lucide-react";
+import { CircleAlert, FileText, Plus, Printer, Trash2 } from "lucide-react";
 import { DataTable, computeDays, computeRequestInvoice } from "@sgs/ui";
 import { Button } from "#/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "#/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "#/components/ui/dialog";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { Checkbox } from "#/components/ui/checkbox";
+import { Textarea } from "#/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "#/components/ui/tooltip";
 import { Tabs, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "#/components/ui/select";
 import { GlassChip } from "#/components/glass-chip";
+import { ScheduleChangeDialog } from "#/components/schedule-change-dialog";
+import { BalanceRows, TotalWithBalance } from "#/components/payment-balance";
+import { paymentSummary } from "#/lib/balance";
+import { ApiError } from "#/lib/api-client";
 import { useClients } from "#/lib/queries/clients";
 import { useItems } from "#/lib/queries/items";
-import { useCreateRequest, useRequest, useRequests, useUpdateRequestStatus } from "#/lib/queries/requests";
+import {
+  useCreateRequest,
+  useExtendRequest,
+  useRequest,
+  useRequests,
+  useRescheduleRequest,
+  useUpdateRequestStatus,
+} from "#/lib/queries/requests";
 import type { BookingRequest, Item, RequestStatus } from "#/lib/admin-types";
 
 export const Route = createFileRoute("/admin/_admin/requests")({ component: RequestsPage });
@@ -43,16 +64,35 @@ const statusColor: Record<RequestStatus, string> = {
 
 const columnHelper = createColumnHelper<BookingRequest>();
 
+function errorMessage(err: unknown, fallback: string) {
+  return err instanceof ApiError || err instanceof Error ? err.message : fallback;
+}
+
+function isAwaitingPayment(req: BookingRequest) {
+  return req.status === "APPROVED" && req.paymentDueAt != null && (req.payment?.length ?? 0) === 0;
+}
+
 function RequestsPage() {
   const [status, setStatus] = useState<RequestStatus | "ALL">("ALL");
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [invoiceRequestId, setInvoiceRequestId] = useState<string | null>(null);
+  const [rejecting, setRejecting] = useState<BookingRequest | null>(null);
   const requests = useRequests({
     status: status === "ALL" ? undefined : status,
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
   });
   const updateStatus = useUpdateRequestStatus();
+  const reschedule = useRescheduleRequest();
+  const extend = useExtendRequest();
+  const changeStatus = (id: string, next: RequestStatus, success: string) =>
+    updateStatus.mutate(
+      { id, status: next },
+      {
+        onSuccess: () => toast.success(success),
+        onError: (err) => toast.error(errorMessage(err, "Couldn't update request")),
+      },
+    );
 
   const columns = [
     columnHelper.accessor("title", { header: "Title" }),
@@ -73,11 +113,36 @@ function RequestsPage() {
     }),
     columnHelper.accessor("chargeAmount", {
       header: "Total",
-      cell: (c) => (c.getValue() != null ? `GHS ${c.getValue()!.toLocaleString()}` : "—"),
+      cell: (c) => <TotalWithBalance chargeAmount={c.getValue()} payments={c.row.original.payment} />,
     }),
     columnHelper.accessor("status", {
       header: "Status",
-      cell: (c) => <GlassChip color={statusColor[c.getValue()]}>{c.getValue()}</GlassChip>,
+      cell: (c) => {
+        const req = c.row.original;
+        return (
+          <div className="flex flex-col items-start gap-1">
+            <GlassChip color={statusColor[c.getValue()]}>{c.getValue()}</GlassChip>
+            {req.status === "REJECTED" && req.rejectReason && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="flex max-w-48 cursor-help items-center gap-1 truncate text-xs text-muted-foreground">
+                    <CircleAlert className="size-3 shrink-0" />
+                    {req.rejectReason}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">{req.rejectReason}</TooltipContent>
+              </Tooltip>
+            )}
+            {isAwaitingPayment(req) && (
+              <span className="text-xs font-medium text-destructive">
+                {new Date(req.paymentDueAt!) > new Date()
+                  ? `Awaiting payment · ${formatDistanceToNowStrict(new Date(req.paymentDueAt!))} left`
+                  : "Payment overdue"}
+              </span>
+            )}
+          </div>
+        );
+      },
     }),
     columnHelper.display({
       id: "actions",
@@ -96,16 +161,11 @@ function RequestsPage() {
                   size="sm"
                   variant="ghost"
                   className="status-btn"
-                  onClick={() => updateStatus.mutate({ id: req.id, status: "APPROVED" })}
+                  onClick={() => changeStatus(req.id, "APPROVED", "Approved — invoice sent to the customer")}
                 >
                   Approve
                 </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="status-btn"
-                  onClick={() => updateStatus.mutate({ id: req.id, status: "REJECTED" })}
-                >
+                <Button size="sm" variant="ghost" className="status-btn" onClick={() => setRejecting(req)}>
                   Reject
                 </Button>
               </>
@@ -115,10 +175,36 @@ function RequestsPage() {
                 size="sm"
                 variant="ghost"
                 className="status-btn"
-                onClick={() => updateStatus.mutate({ id: req.id, status: "COMPLETED" })}
+                onClick={() => changeStatus(req.id, "COMPLETED", "Marked completed")}
               >
                 Mark completed
               </Button>
+            )}
+            {(req.status === "PENDED" || req.status === "APPROVED") && (
+              <>
+                <ScheduleChangeDialog
+                  mode="reschedule"
+                  byStaff
+                  requestTitle={req.title}
+                  packages={req.packages}
+                  chargeAmount={req.chargeAmount}
+                  paidAmount={paymentSummary(req.chargeAmount, req.payment).paid}
+                  onReschedule={async (values) => {
+                    await reschedule.mutateAsync({ id: req.id, ...values });
+                  }}
+                />
+                <ScheduleChangeDialog
+                  mode="extend"
+                  byStaff
+                  requestTitle={req.title}
+                  packages={req.packages}
+                  chargeAmount={req.chargeAmount}
+                  paidAmount={paymentSummary(req.chargeAmount, req.payment).paid}
+                  onExtend={async (values) => {
+                    await extend.mutateAsync({ id: req.id, ...values });
+                  }}
+                />
+              </>
             )}
           </div>
         );
@@ -167,7 +253,84 @@ function RequestsPage() {
         open={invoiceRequestId != null}
         onOpenChange={(open) => !open && setInvoiceRequestId(null)}
       />
+
+      <RejectRequestDialog request={rejecting} onOpenChange={(open) => !open && setRejecting(null)} />
     </div>
+  );
+}
+
+const REJECT_PRESETS = [
+  "The facility is not available for the requested period.",
+  "The facility is closed for an emergency or maintenance.",
+  "The request is missing required details. Please submit a new request.",
+];
+
+// Rejection always carries a reason — it's emailed and texted to the
+// customer, and shown in their Bookings table.
+function RejectRequestDialog({
+  request,
+  onOpenChange,
+}: {
+  request: BookingRequest | null;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [reason, setReason] = useState("");
+  const updateStatus = useUpdateRequestStatus();
+
+  const submit = () => {
+    if (!request) return;
+    updateStatus.mutate(
+      { id: request.id, status: "REJECTED", reason: reason.trim() },
+      {
+        onSuccess: () => {
+          toast.success("Request rejected — the customer has been notified");
+          setReason("");
+          onOpenChange(false);
+        },
+        onError: (err) => toast.error(errorMessage(err, "Couldn't reject request")),
+      },
+    );
+  };
+
+  return (
+    <Dialog open={request != null} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Reject “{request?.title}”</DialogTitle>
+          <DialogDescription>
+            {request?.client?.name ?? "The customer"} will receive this reason by email and SMS.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-1.5">
+            {REJECT_PRESETS.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => setReason(preset)}
+                className="rounded-full border border-border px-2.5 py-1 text-left text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                {preset}
+              </button>
+            ))}
+          </div>
+          <Label htmlFor="reject-reason">Reason</Label>
+          <Textarea
+            id="reject-reason"
+            rows={4}
+            maxLength={650}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Explain why this request can't be approved"
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="destructive" onClick={submit} disabled={!reason.trim() || updateStatus.isPending}>
+            {updateStatus.isPending ? "Rejecting…" : "Reject and notify"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -229,6 +392,7 @@ function RequestInvoiceDialog({
               <span>Total</span>
               <span className="tabular-nums">GHS {(request.chargeAmount ?? 0).toFixed(2)}</span>
             </div>
+            <BalanceRows chargeAmount={request.chargeAmount} payments={request.payment} />
             <DialogFooter>
               <Button asChild variant="outline">
                 <a href={`/admin/requests/${request.id}/print`} target="_blank" rel="noreferrer">
@@ -431,6 +595,9 @@ function CreateRequestDialog() {
           reset({ clientId: "", title: "", packages: [emptyPackage] });
           toast.success("Booking request created");
         },
+        // Most often the availability check: overlap with an approved
+        // booking or an admin-blocked date.
+        onError: (err) => toast.error(errorMessage(err, "Couldn't create request")),
       },
     );
   });

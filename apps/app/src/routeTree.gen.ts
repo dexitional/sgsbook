@@ -14,6 +14,7 @@ import { Route as CustomerDashboardRouteImport } from './routes/_customer/dashbo
 import { Route as CustomerReceiptsRouteImport } from './routes/_customer/receipts'
 import { Route as CustomerRequestsRouteImport } from './routes/_customer/requests'
 import { Route as WebIndexRouteImport } from './routes/_web/index'
+import { Route as WebGuideRouteImport } from './routes/_web/guide'
 import { Route as WebOnboardingRouteImport } from './routes/_web/onboarding'
 import { Route as WebSigninRouteImport } from './routes/_web/signin'
 import { Route as WebSignupRouteImport } from './routes/_web/signup'
@@ -21,7 +22,9 @@ import { Route as AdminAdminRouteRouteImport } from './routes/admin/_admin/route
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as ApiSplatRouteImport } from './routes/api/$'
 import { Route as AdminAdminIndexRouteImport } from './routes/admin/_admin/index'
+import { Route as AdminAdminBlockedDatesRouteImport } from './routes/admin/_admin/blocked-dates'
 import { Route as AdminAdminClientsRouteImport } from './routes/admin/_admin/clients'
+import { Route as AdminAdminGuideRouteImport } from './routes/admin/_admin/guide'
 import { Route as AdminAdminItemsRouteImport } from './routes/admin/_admin/items'
 import { Route as AdminAdminPaymentsRouteImport } from './routes/admin/_admin/payments'
 import { Route as AdminAdminRequestsRouteImport } from './routes/admin/_admin/requests'
@@ -54,6 +57,11 @@ const CustomerRequestsRoute = CustomerRequestsRouteImport.update({
 const WebIndexRoute = WebIndexRouteImport.update({
   id: '/_web/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WebGuideRoute = WebGuideRouteImport.update({
+  id: '/_web/guide',
+  path: '/guide',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WebOnboardingRoute = WebOnboardingRouteImport.update({
@@ -91,9 +99,19 @@ const AdminAdminIndexRoute = AdminAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
+const AdminAdminBlockedDatesRoute = AdminAdminBlockedDatesRouteImport.update({
+  id: '/blocked-dates',
+  path: '/blocked-dates',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
 const AdminAdminClientsRoute = AdminAdminClientsRouteImport.update({
   id: '/clients',
   path: '/clients',
+  getParentRoute: () => AdminAdminRouteRoute,
+} as any)
+const AdminAdminGuideRoute = AdminAdminGuideRouteImport.update({
+  id: '/guide',
+  path: '/guide',
   getParentRoute: () => AdminAdminRouteRoute,
 } as any)
 const AdminAdminItemsRoute = AdminAdminItemsRouteImport.update({
@@ -150,12 +168,15 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof CustomerDashboardRoute
   '/receipts': typeof CustomerReceiptsRoute
   '/requests': typeof CustomerRequestsRoute
+  '/guide': typeof WebGuideRoute
   '/onboarding': typeof WebOnboardingRoute
   '/signin': typeof WebSigninRoute
   '/signup': typeof WebSignupRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/$': typeof ApiSplatRoute
+  '/admin/blocked-dates': typeof AdminAdminBlockedDatesRoute
   '/admin/clients': typeof AdminAdminClientsRoute
+  '/admin/guide': typeof AdminAdminGuideRoute
   '/admin/items': typeof AdminAdminItemsRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/requests': typeof AdminAdminRequestsRoute
@@ -172,12 +193,15 @@ export interface FileRoutesByTo {
   '/dashboard': typeof CustomerDashboardRoute
   '/receipts': typeof CustomerReceiptsRoute
   '/requests': typeof CustomerRequestsRoute
+  '/guide': typeof WebGuideRoute
   '/onboarding': typeof WebOnboardingRoute
   '/signin': typeof WebSigninRoute
   '/signup': typeof WebSignupRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/$': typeof ApiSplatRoute
+  '/admin/blocked-dates': typeof AdminAdminBlockedDatesRoute
   '/admin/clients': typeof AdminAdminClientsRoute
+  '/admin/guide': typeof AdminAdminGuideRoute
   '/admin/items': typeof AdminAdminItemsRoute
   '/admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/requests': typeof AdminAdminRequestsRoute
@@ -196,13 +220,16 @@ export interface FileRoutesById {
   '/_customer/dashboard': typeof CustomerDashboardRoute
   '/_customer/receipts': typeof CustomerReceiptsRoute
   '/_customer/requests': typeof CustomerRequestsRoute
+  '/_web/guide': typeof WebGuideRoute
   '/_web/onboarding': typeof WebOnboardingRoute
   '/_web/signin': typeof WebSigninRoute
   '/_web/signup': typeof WebSignupRoute
   '/admin/login': typeof AdminLoginRoute
   '/api/$': typeof ApiSplatRoute
   '/_web/': typeof WebIndexRoute
+  '/admin/_admin/blocked-dates': typeof AdminAdminBlockedDatesRoute
   '/admin/_admin/clients': typeof AdminAdminClientsRoute
+  '/admin/_admin/guide': typeof AdminAdminGuideRoute
   '/admin/_admin/items': typeof AdminAdminItemsRoute
   '/admin/_admin/payments': typeof AdminAdminPaymentsRoute
   '/admin/_admin/requests': typeof AdminAdminRequestsRoute
@@ -222,12 +249,15 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/receipts'
     | '/requests'
+    | '/guide'
     | '/onboarding'
     | '/signin'
     | '/signup'
     | '/admin/login'
     | '/api/$'
+    | '/admin/blocked-dates'
     | '/admin/clients'
+    | '/admin/guide'
     | '/admin/items'
     | '/admin/payments'
     | '/admin/requests'
@@ -244,12 +274,15 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/receipts'
     | '/requests'
+    | '/guide'
     | '/onboarding'
     | '/signin'
     | '/signup'
     | '/admin/login'
     | '/api/$'
+    | '/admin/blocked-dates'
     | '/admin/clients'
+    | '/admin/guide'
     | '/admin/items'
     | '/admin/payments'
     | '/admin/requests'
@@ -267,13 +300,16 @@ export interface FileRouteTypes {
     | '/_customer/dashboard'
     | '/_customer/receipts'
     | '/_customer/requests'
+    | '/_web/guide'
     | '/_web/onboarding'
     | '/_web/signin'
     | '/_web/signup'
     | '/admin/login'
     | '/api/$'
     | '/_web/'
+    | '/admin/_admin/blocked-dates'
     | '/admin/_admin/clients'
+    | '/admin/_admin/guide'
     | '/admin/_admin/items'
     | '/admin/_admin/payments'
     | '/admin/_admin/requests'
@@ -289,6 +325,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   CustomerRouteRoute: typeof CustomerRouteRouteWithChildren
   AdminAdminRouteRoute: typeof AdminAdminRouteRouteWithChildren
+  WebGuideRoute: typeof WebGuideRoute
   WebOnboardingRoute: typeof WebOnboardingRoute
   WebSigninRoute: typeof WebSigninRoute
   WebSignupRoute: typeof WebSignupRoute
@@ -337,6 +374,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof WebIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_web/guide': {
+      id: '/_web/guide'
+      path: '/guide'
+      fullPath: '/guide'
+      preLoaderRoute: typeof WebGuideRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_web/onboarding': {
@@ -388,11 +432,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdminIndexRouteImport
       parentRoute: typeof AdminAdminRouteRoute
     }
+    '/admin/_admin/blocked-dates': {
+      id: '/admin/_admin/blocked-dates'
+      path: '/blocked-dates'
+      fullPath: '/admin/blocked-dates'
+      preLoaderRoute: typeof AdminAdminBlockedDatesRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
     '/admin/_admin/clients': {
       id: '/admin/_admin/clients'
       path: '/clients'
       fullPath: '/admin/clients'
       preLoaderRoute: typeof AdminAdminClientsRouteImport
+      parentRoute: typeof AdminAdminRouteRoute
+    }
+    '/admin/_admin/guide': {
+      id: '/admin/_admin/guide'
+      path: '/guide'
+      fullPath: '/admin/guide'
+      preLoaderRoute: typeof AdminAdminGuideRouteImport
       parentRoute: typeof AdminAdminRouteRoute
     }
     '/admin/_admin/items': {
@@ -478,7 +536,9 @@ const CustomerRouteRouteWithChildren = CustomerRouteRoute._addFileChildren(
 )
 
 interface AdminAdminRouteRouteChildren {
+  AdminAdminBlockedDatesRoute: typeof AdminAdminBlockedDatesRoute
   AdminAdminClientsRoute: typeof AdminAdminClientsRoute
+  AdminAdminGuideRoute: typeof AdminAdminGuideRoute
   AdminAdminItemsRoute: typeof AdminAdminItemsRoute
   AdminAdminPaymentsRoute: typeof AdminAdminPaymentsRoute
   AdminAdminRequestsRoute: typeof AdminAdminRequestsRoute
@@ -487,7 +547,9 @@ interface AdminAdminRouteRouteChildren {
 }
 
 const AdminAdminRouteRouteChildren: AdminAdminRouteRouteChildren = {
+  AdminAdminBlockedDatesRoute: AdminAdminBlockedDatesRoute,
   AdminAdminClientsRoute: AdminAdminClientsRoute,
+  AdminAdminGuideRoute: AdminAdminGuideRoute,
   AdminAdminItemsRoute: AdminAdminItemsRoute,
   AdminAdminPaymentsRoute: AdminAdminPaymentsRoute,
   AdminAdminRequestsRoute: AdminAdminRequestsRoute,
@@ -502,6 +564,7 @@ const AdminAdminRouteRouteWithChildren = AdminAdminRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   CustomerRouteRoute: CustomerRouteRouteWithChildren,
   AdminAdminRouteRoute: AdminAdminRouteRouteWithChildren,
+  WebGuideRoute: WebGuideRoute,
   WebOnboardingRoute: WebOnboardingRoute,
   WebSigninRoute: WebSigninRoute,
   WebSignupRoute: WebSignupRoute,

@@ -43,8 +43,42 @@ export function useCreateRequest() {
 export function useUpdateRequestStatus() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: RequestStatus }) =>
-      api.patch<{ request: BookingRequest }>(`/requests/${id}/status`, { status }),
+    // `reason` is required by the API when status is REJECTED — it's sent to
+    // the customer by email and SMS.
+    mutationFn: ({ id, status, reason }: { id: string; status: RequestStatus; reason?: string }) =>
+      api.patch<{ request: BookingRequest }>(`/requests/${id}/status`, { status, reason }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["requests"] }),
+  });
+}
+
+export interface RescheduleRequestInput {
+  id: string;
+  reason: string;
+  packages: Array<{ packageId: string; bookStart: string; bookEnd: string }>;
+}
+
+// Reschedule: new period, re-priced on that period only.
+export function useRescheduleRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: RescheduleRequestInput) =>
+      api.patch<{ request: BookingRequest }>(`/requests/${id}/schedule`, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["requests"] }),
+  });
+}
+
+export interface ExtendRequestInput {
+  id: string;
+  reason: string;
+  packages: Array<{ packageId: string; bookEnd: string }>;
+}
+
+// Extension: start stays, end moves later, extra days added as a balance.
+export function useExtendRequest() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...input }: ExtendRequestInput) =>
+      api.patch<{ request: BookingRequest }>(`/requests/${id}/extend`, input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["requests"] }),
   });
 }

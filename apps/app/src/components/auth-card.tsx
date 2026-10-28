@@ -3,12 +3,15 @@ import { Button } from "#/components/ui/button";
 import { GoogleIcon } from "#/components/google-icon";
 import { authClient } from "#/lib/auth-client";
 import { asset } from "#/lib/asset";
+import { markQuickBookOnSignIn } from "#/lib/booking-intent";
 
 export function AuthCard({ title, subtitle }: { title: string; subtitle: string }) {
   const [loading, setLoading] = useState(false);
 
   const continueWithGoogle = async () => {
     setLoading(true);
+    // Opens the quick-booking dialog once the customer lands back in the app.
+    markQuickBookOnSignIn();
     await authClient.signIn.social({ provider: "google", callbackURL: "/onboarding" });
   };
 

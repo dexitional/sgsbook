@@ -66,9 +66,51 @@ export interface BookingRequest {
   description: string | null;
   status: RequestStatus;
   chargeAmount: number | null;
+  rejectReason: string | null;
+  paymentDueAt: string | null;
   createdAt: string;
   client: Client | null;
   packages: RequestPackage[];
+  // List rows include only active payments; detail includes every payment
+  // row (voided ones have status false).
+  payment?: { id: string; paidAmount: number | null; status?: boolean }[];
+  reschedules?: RescheduleLog[];
+}
+
+export interface RescheduleLog {
+  id: string;
+  packageId: string;
+  type: "RESCHEDULE" | "EXTENSION";
+  chargeBefore: number | null;
+  chargeAfter: number | null;
+  oldStart: string | null;
+  oldEnd: string | null;
+  newStart: string;
+  newEnd: string;
+  reason: string;
+  changedBy: string;
+  createdAt: string;
+}
+
+export interface BlockedDate {
+  id: string;
+  itemId: string | null;
+  blockStart: string;
+  blockEnd: string;
+  reason: string;
+  createdAt: string;
+  item: { id: string; title: string } | null;
+  creator?: { username: string } | null;
+}
+
+export interface BlockAffectedBooking {
+  requestId: string;
+  title: string;
+  status: RequestStatus;
+  clientName: string | null;
+  itemTitle: string;
+  bookStart: string | null;
+  bookEnd: string | null;
 }
 
 export interface Payment {

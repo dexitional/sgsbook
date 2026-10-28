@@ -65,11 +65,12 @@ model user {
 
   group group? @relation(fields: [groupId], references: [id])
 
-  userRole   userRole[]
-  provider   provider[]
-  UbsRequest UbsRequest[]
-  UbsPayment UbsPayment[]
-  aiMessages UbsAiMessage[]
+  userRole     userRole[]
+  provider     provider[]
+  UbsRequest   UbsRequest[]
+  UbsPayment   UbsPayment[]
+  aiMessages   UbsAiMessage[]
+  blockedDates UbsBlockedDate[]
 
   @@map("sso_user")
 }

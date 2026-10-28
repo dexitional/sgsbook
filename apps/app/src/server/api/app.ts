@@ -18,6 +18,8 @@ import { usersRoute } from "./modules/users/route.js";
 import { publicRoute } from "./modules/public/route.js";
 import { aiRoute } from "./modules/ai/route.js";
 import { uploadsRoute } from "./modules/uploads/route.js";
+import { blockedDatesRoute } from "./modules/blocked-dates/route.js";
+import { startPaymentDeadlineSweeper } from "./lib/payment-deadline.js";
 
 const app = new Hono();
 
@@ -36,6 +38,11 @@ app.route("/users", usersRoute);
 app.route("/public", publicRoute);
 app.route("/ai", aiRoute);
 app.route("/uploads", uploadsRoute);
+app.route("/blocked-dates", blockedDatesRoute);
+
+// Auto-declines approved requests left unpaid past their deadline — see
+// lib/payment-deadline.ts. Starts the first time this module loads.
+startPaymentDeadlineSweeper();
 
 export type AppType = typeof app;
 export { app as apiApp };

@@ -8,6 +8,7 @@ import { Button } from "#/components/ui/button";
 import { getRequestInvoice } from "#/server/customer";
 import type { RequestStatus } from "#/lib/customer-types";
 import { asset } from "#/lib/asset";
+import { BalanceRows } from "#/components/payment-balance";
 
 export const Route = createFileRoute("/requests/$requestId/print")({ component: PrintRequestInvoicePage });
 
@@ -121,6 +122,7 @@ function PrintRequestInvoicePage() {
               <span>Invoice total</span>
               <span className="font-mono tabular-nums">GHS {(request.chargeAmount ?? 0).toLocaleString()}</span>
             </div>
+            <BalanceRows chargeAmount={request.chargeAmount} payments={request.payment} />
           </div>
         </div>
 

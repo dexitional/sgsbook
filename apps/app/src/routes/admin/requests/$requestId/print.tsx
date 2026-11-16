@@ -7,6 +7,7 @@ import { Button } from "#/components/ui/button";
 import { useRequest } from "#/lib/queries/requests";
 import type { RequestStatus } from "#/lib/admin-types";
 import { asset } from "#/lib/asset";
+import { PrintSkeleton } from "#/components/skeletons";
 import { BalanceRows } from "#/components/payment-balance";
 
 export const Route = createFileRoute("/admin/requests/$requestId/print")({ component: PrintRequestInvoicePage });
@@ -24,7 +25,7 @@ function PrintRequestInvoicePage() {
   const request = data?.request;
 
   if (isLoading) {
-    return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
+    return <PrintSkeleton />;
   }
 
   if (!request) {

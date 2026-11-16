@@ -146,7 +146,7 @@ export function DataTable<TData>({
                 <tr key={i} className="border-b border-border last:border-0">
                   {columns.map((_, j) => (
                     <td key={j} className="px-3 py-3">
-                      <div className="h-4 w-full max-w-32 animate-pulse rounded bg-muted" />
+                      <div aria-hidden className="skeleton h-4 w-full max-w-32 rounded" />
                     </td>
                   ))}
                 </tr>

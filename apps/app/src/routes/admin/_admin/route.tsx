@@ -22,6 +22,8 @@ import { CommandPalette } from "#/components/command-palette";
 import { asset } from "#/lib/asset";
 import { AiInsightsPanel } from "#/components/ai-insights-panel";
 import { useAdminSession, useLogout } from "#/lib/queries/session";
+import { ShellSkeleton } from "#/components/skeletons";
+import { usePreloadRoutes } from "#/lib/use-preload-routes";
 import { useThemeStore, IconButton } from "@sgs/ui";
 
 export const Route = createFileRoute("/admin/_admin")({
@@ -70,18 +72,16 @@ function AdminLayout() {
   const { data, isLoading, isError } = useAdminSession();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  usePreloadRoutes(
+    navItems.map((item) => item.to),
+    Boolean(data?.user),
+  );
 
   useEffect(() => {
     if (!isLoading && isError) navigate({ to: "/admin/login" });
   }, [isLoading, isError, navigate]);
 
-  if (isLoading || isError) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
-        Loading…
-      </div>
-    );
-  }
+  if (isLoading || isError) return <ShellSkeleton navCount={navItems.length} />;
 
   const user = data?.user;
 

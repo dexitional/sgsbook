@@ -52,7 +52,11 @@ export function StatCard({
             <p className="truncate text-base font-medium text-foreground">{label}</p>
           </div>
           <p className="mt-4 font-mono text-3xl font-bold tabular-nums text-foreground">
-            {isLoading ? "—" : animated.toLocaleString()}
+            {isLoading ? (
+              <span aria-label="Loading" className="skeleton inline-block h-8 w-20 rounded-md align-middle" />
+            ) : (
+              animated.toLocaleString()
+            )}
           </p>
         </CardContent>
       </Card>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { BookOpen, CalendarPlus, LayoutDashboard, LogOut, Menu, Moon, Receipt, Search, Sun } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "#/components/ui/dropdown-menu";
@@ -13,6 +13,8 @@ import { authClient } from "#/lib/auth-client";
 import { asset } from "#/lib/asset";
 import { takeBookingIntent, takeQuickBookOnSignIn, type BookingIntent } from "#/lib/booking-intent";
 import { CustomerBookingDialog } from "#/components/customer-booking-dialog";
+import { ShellSkeleton } from "#/components/skeletons";
+import { usePreloadRoutes } from "#/lib/use-preload-routes";
 
 export const Route = createFileRoute("/_customer")({ component: CustomerLayout });
 
@@ -51,6 +53,7 @@ function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () 
 function CustomerLayout() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const queryClient = useQueryClient();
   const customer = useQuery({ queryKey: ["customer"], queryFn: () => getCurrentCustomer() });
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [quickBook, setQuickBook] = useState<{ open: boolean; intent: BookingIntent | null; welcome: boolean }>({
@@ -59,6 +62,10 @@ function CustomerLayout() {
     welcome: false,
   });
   const ready = Boolean(customer.data?.authenticated && customer.data.client && customer.data.client.contacts.length > 0);
+  usePreloadRoutes(
+    navItems.map((item) => item.to),
+    ready,
+  );
 
   // Request on-boarding: right after sign-in (flag set by AuthCard), or after
   // picking a day on the public calendar, open the quick-booking dialog —
@@ -91,11 +98,7 @@ function CustomerLayout() {
     !customer.data.client ||
     customer.data.client.contacts.length === 0
   ) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
-        Loading…
-      </div>
-    );
+    return <ShellSkeleton navCount={navItems.length} />;
   }
 
   const { user, client } = customer.data;
@@ -192,7 +195,15 @@ function CustomerLayout() {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => authClient.signOut().then(() => navigate({ to: "/" }))}>
+                <DropdownMenuItem
+                  onClick={() =>
+                    authClient.signOut().then(() => {
+                      // Forget this customer's data so the next sign-in starts clean.
+                      queryClient.clear();
+                      navigate({ to: "/" });
+                    })
+                  }
+                >
                   <LogOut className="mr-2 size-4" />
                   Sign out
                 </DropdownMenuItem>

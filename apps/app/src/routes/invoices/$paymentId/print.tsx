@@ -6,6 +6,7 @@ import { computeDays } from "@sgs/ui";
 import { Button } from "#/components/ui/button";
 import { getPaymentInvoice } from "#/server/customer";
 import { asset } from "#/lib/asset";
+import { PrintSkeleton } from "#/components/skeletons";
 
 export const Route = createFileRoute("/invoices/$paymentId/print")({ component: PrintInvoicePage });
 
@@ -17,7 +18,7 @@ function PrintInvoicePage() {
   });
 
   if (invoice.isLoading) {
-    return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
+    return <PrintSkeleton />;
   }
 
   if (invoice.isError || !invoice.data) {

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { useAdminSession, useLogin } from "#/lib/queries/session";
 import { ApiError } from "#/lib/api-client";
 import { asset } from "#/lib/asset";
+import { FormCardSkeleton } from "#/components/skeletons";
 
 export const Route = createFileRoute("/admin/login")({
   head: () => ({ meta: [{ title: "UBS Admin" }] }),
@@ -42,14 +43,7 @@ function LoginPage() {
   }, [session.data, navigate]);
 
   if (session.isLoading || session.data?.user) {
-    return (
-      <div
-        className="flex min-h-screen items-center justify-center bg-[#f3f3f3] text-black/60"
-        style={{ fontFamily: SEGOE_STACK }}
-      >
-        Loading…
-      </div>
-    );
+    return <FormCardSkeleton fields={2} className="bg-[#f3f3f3]" />;
   }
 
   return (

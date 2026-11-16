@@ -10,6 +10,17 @@ export class ApiError extends Error {
   }
 }
 
+// A 401 on an admin page means the session ran out while the page was open:
+// go to the sign-in page instead of leaving the page half-broken. Calls to
+// the auth endpoints themselves (a wrong password) are left to the form.
+function redirectToSignIn(path: string) {
+  if (typeof window === "undefined" || path.startsWith("/admin-auth/")) return;
+  const here = window.location.pathname;
+  if ((here === "/admin" || here.startsWith("/admin/")) && here !== "/admin/login") {
+    window.location.assign("/admin/login");
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
@@ -18,6 +29,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
 
   if (!res.ok) {
+    if (res.status === 401) redirectToSignIn(path);
     const body = await res.json().catch(() => ({ error: res.statusText }));
     throw new ApiError(body.error ?? "Request failed", res.status);
   }

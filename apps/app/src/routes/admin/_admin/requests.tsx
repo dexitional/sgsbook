@@ -38,6 +38,7 @@ import { ScheduleChangeDialog } from "#/components/schedule-change-dialog";
 import { BalanceRows, TotalWithBalance } from "#/components/payment-balance";
 import { paymentSummary } from "#/lib/balance";
 import { ApiError } from "#/lib/api-client";
+import { DialogBodySkeleton } from "#/components/skeletons";
 import { useClients } from "#/lib/queries/clients";
 import { useItems } from "#/lib/queries/items";
 import {
@@ -352,7 +353,7 @@ function RequestInvoiceDialog({
         <DialogHeader>
           <DialogTitle>Invoice — {request?.title ?? "…"}</DialogTitle>
         </DialogHeader>
-        {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+        {isLoading && <DialogBodySkeleton />}
         {request && (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">Client: {request.client?.name ?? "—"}</p>

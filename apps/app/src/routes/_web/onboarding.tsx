@@ -9,6 +9,7 @@ import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { getCurrentCustomer, completeOnboarding } from "#/server/customer";
+import { FormCardSkeleton } from "#/components/skeletons";
 
 export const Route = createFileRoute("/_web/onboarding")({ component: OnboardingPage });
 
@@ -63,7 +64,7 @@ function OnboardingPage() {
   // form flashes on screen for one frame before the effect navigates an
   // already-onboarded customer away to /dashboard.
   if (customer.isLoading || !customer.data?.authenticated || alreadyOnboarded) {
-    return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
+    return <FormCardSkeleton fields={5} />;
   }
 
   return (

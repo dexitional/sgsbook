@@ -13,6 +13,9 @@ export function useAdminSession() {
     queryKey: ["session"],
     queryFn: () => api.get<{ user: AdminUser }>("/admin-auth/me"),
     retry: false,
+    // The layout keeps showing the signed-in user while this refreshes in the
+    // background; an expired session is caught by the API client's 401 check.
+    staleTime: 5 * 60_000,
   });
 }
 

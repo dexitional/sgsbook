@@ -15,6 +15,7 @@ import appCss from '../styles.css?url'
 import { asset } from '#/lib/asset'
 
 import type { QueryClient } from '@tanstack/react-query'
+import { NavigationProgress } from "#/components/skeletons";
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -87,6 +88,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <ThemeProvider>
+          <NavigationProgress />
           {children}
           <Toaster richColors position="top-right" />
         </ThemeProvider>

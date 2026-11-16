@@ -27,6 +27,7 @@ import {
 } from "#/lib/public-api";
 import { facilityColorVar, paleTint } from "#/lib/facility-colors";
 import { BookDateDialog } from "#/components/book-date-dialog";
+import { Skeleton } from "#/components/ui/skeleton";
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -198,7 +199,12 @@ export function AvailabilityCalendarDialog() {
           <div className="space-y-1.5 border-t border-border pt-3">
             <p className="text-xs font-medium text-muted-foreground">Facilities</p>
             {isLoading ? (
-              <p className="text-xs text-muted-foreground">Loading…</p>
+              <div role="status" className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                <span className="sr-only">Loading…</span>
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-3 w-28" />
+                ))}
+              </div>
             ) : facilityList.length === 0 ? (
               <p className="text-xs text-muted-foreground">No facilities yet.</p>
             ) : (
